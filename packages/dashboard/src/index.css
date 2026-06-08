@@ -72,6 +72,8 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .graph-node { cursor: pointer; }
 .graph-node circle { stroke: #0c0e12; stroke-width: 2; transition: r 0.1s; }
 .graph-node.selected circle { stroke: var(--text); stroke-width: 3; }
+.graph-node:focus { outline: none; }
+.graph-node:focus-visible circle { stroke: var(--accent); stroke-width: 3; }
 .graph-node-label { fill: var(--muted); font-size: 11px; pointer-events: none; }
 
 .graph-detail { border-left: 1px solid var(--border); padding-left: 14px; }
