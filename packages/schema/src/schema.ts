@@ -69,6 +69,8 @@ const Meta = z.object({
     .default({}),
 });
 
+// Keys must mirror Brief's prose fields (idea/problem/why/how/takeaway).
+// Each maps a prose card to the evidence ids that back it.
 const BriefEvidence = z
   .object({
     idea: z.array(z.string()).optional(),
