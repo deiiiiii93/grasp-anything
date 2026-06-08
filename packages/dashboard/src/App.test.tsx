@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { App } from "./App";
 import { sampleDoc } from "./test-utils/sample";
 
@@ -15,5 +15,18 @@ describe("App", () => {
     render(<App doc={sampleDoc} />);
     const whyCard = screen.getByTestId("card-why");
     expect(whyCard.querySelectorAll('[data-testid="evidence-chip"]')).toHaveLength(1);
+  });
+});
+
+describe("App graphs", () => {
+  it("shows the concept graph by default and switches to the landscape on tab click", () => {
+    render(<App doc={sampleDoc} />);
+    expect(screen.getByRole("tab", { name: "Concept map" })).toBeInTheDocument();
+    expect(screen.getByTestId("concept-graph")).toBeInTheDocument();
+    expect(screen.queryByTestId("landscape-graph")).toBeNull();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Landscape" }));
+    expect(screen.getByTestId("landscape-graph")).toBeInTheDocument();
+    expect(screen.queryByTestId("concept-graph")).toBeNull();
   });
 });
