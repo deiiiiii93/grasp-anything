@@ -5,6 +5,11 @@ export const conceptEdgeTypes = ["addresses", "composedOf", "enables", "produces
 export const landscapeNodeTypes = ["self", "alternative", "category"] as const;
 export const landscapeEdgeTypes = ["competesWith", "sharesApproach", "alternativeTo"] as const;
 
+export type ConceptNodeType = (typeof conceptNodeTypes)[number];
+export type ConceptEdgeType = (typeof conceptEdgeTypes)[number];
+export type LandscapeNodeType = (typeof landscapeNodeTypes)[number];
+export type LandscapeEdgeType = (typeof landscapeEdgeTypes)[number];
+
 const ConceptNode = z.object({
   id: z.string().min(1),
   type: z.enum(conceptNodeTypes),
@@ -64,6 +69,16 @@ const Meta = z.object({
     .default({}),
 });
 
+const BriefEvidence = z
+  .object({
+    idea: z.array(z.string()).optional(),
+    problem: z.array(z.string()).optional(),
+    why: z.array(z.string()).optional(),
+    how: z.array(z.string()).optional(),
+    takeaway: z.array(z.string()).optional(),
+  })
+  .optional();
+
 const Brief = z.object({
   idea: z.string().min(1),
   problem: z.string().min(1),
@@ -75,6 +90,7 @@ const Brief = z.object({
     success: z.string().min(1),
     landscape: z.string().min(1),
   }),
+  evidence: BriefEvidence,
 });
 
 export const BriefDocSchema = z
@@ -134,6 +150,12 @@ export const BriefDocSchema = z
     };
     doc.conceptGraph.nodes.forEach((n, i) => checkEvidence(n.evidenceIds, ["conceptGraph", "nodes", i, "evidenceIds"]));
     doc.landscapeGraph.nodes.forEach((n, i) => checkEvidence(n.evidenceIds, ["landscapeGraph", "nodes", i, "evidenceIds"]));
+
+    if (doc.brief.evidence) {
+      for (const [key, ids] of Object.entries(doc.brief.evidence)) {
+        checkEvidence(ids ?? [], ["brief", "evidence", key]);
+      }
+    }
 
     doc.landscapeGraph.nodes.forEach((n, i) => {
       if (n.type === "alternative" && (!n.name || !n.url)) {

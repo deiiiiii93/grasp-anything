@@ -17,7 +17,8 @@
       "essence": "2026-06-08T12:00:00Z",
       "success": "2026-06-08T12:00:00Z",
       "landscape": "2026-06-08T12:00:00Z"
-    }
+    },
+    "evidence": { "why": ["ev1"] }
   },
   "conceptGraph": {
     "nodes": [

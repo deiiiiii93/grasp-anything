@@ -84,3 +84,26 @@ describe("cross-field rules", () => {
     expect(JSON.stringify(r).toLowerCase()).toContain("category node");
   });
 });
+
+describe("brief.evidence", () => {
+  it("accepts the golden sample whose brief cites evidence", () => {
+    const result = BriefDocSchema.safeParse(sample);
+    expect(result.success).toBe(true);
+    expect(result.data?.brief.evidence?.why).toEqual(["ev1"]);
+  });
+
+  it("rejects a brief.evidence reference to missing evidence", () => {
+    const bad = clone();
+    bad.brief.evidence = { why: ["ghost"] };
+    const r = BriefDocSchema.safeParse(bad);
+    expect(r.success).toBe(false);
+    expect(JSON.stringify(r)).toContain("ghost");
+  });
+
+  it("accepts a brief with no evidence map at all", () => {
+    const ok = clone();
+    delete ok.brief.evidence;
+    const r = BriefDocSchema.safeParse(ok);
+    expect(r.success).toBe(true);
+  });
+});
