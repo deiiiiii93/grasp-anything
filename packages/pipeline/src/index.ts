@@ -3,3 +3,4 @@ export * from "./fragments";
 export * from "./assemble";
 export * from "./render";
 export * from "./state";
+export * from "./fingerprint";
