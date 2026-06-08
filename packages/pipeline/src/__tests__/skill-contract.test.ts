@@ -28,6 +28,8 @@ describe("SKILL.md orchestrator contract", () => {
       "--full",
       "--auto-update",
       "--prior",
+      "grasp-export",
+      "report.html",
     ]) {
       expect(md).toContain(token);
     }

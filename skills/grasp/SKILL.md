@@ -103,6 +103,24 @@ Open the `index.html` path the CLI printed (e.g. `open <path>` on macOS). It is 
 self-contained page under `<target>/.grasp/dashboard/` that fetches
 `./repo-brief.json` — no server, no build.
 
+## Export & share
+
+To share the brief outside the dashboard, run the **`grasp-export`** CLI against
+the written brief:
+
+```bash
+npx tsx packages/export/src/cli.ts <target>/.grasp/dashboard/repo-brief.json \
+  --format both --out <target>/.grasp
+```
+
+It writes `report.md` (paste-ready for a README or PR — the two graphs render as
+Mermaid) and `report.html` (a self-contained print page). For a PDF, open
+`report.html` and print to PDF, or — when a headless Chrome is available —
+
+```bash
+chrome --headless --print-to-pdf="<target>/.grasp/report.pdf" "<target>/.grasp/report.html"
+```
+
 ## Degradation & errors
 
 - `broadness: web` but search is unavailable → degrade to offline; tell the user
