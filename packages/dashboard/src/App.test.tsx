@@ -28,5 +28,7 @@ describe("App graphs", () => {
     fireEvent.click(screen.getByRole("tab", { name: "Landscape" }));
     expect(screen.getByTestId("landscape-graph")).toBeInTheDocument();
     expect(screen.queryByTestId("concept-graph")).toBeNull();
+    expect(screen.getByRole("tab", { name: "Landscape" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "Concept map" })).toHaveAttribute("aria-selected", "false");
   });
 });
