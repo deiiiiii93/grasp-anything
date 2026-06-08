@@ -54,3 +54,35 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .evidence-chip.inferred { background: var(--inferred); }
 
 .error-screen { color: var(--problem); padding: 32px; white-space: pre-wrap; font-family: ui-monospace, monospace; }
+
+.graphs { margin-top: 32px; }
+.graph-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+.graph-tabs button {
+  background: var(--panel); color: var(--muted); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 14px; font-size: 14px; cursor: pointer;
+}
+.graph-tabs button.active { color: var(--text); border-color: var(--accent); }
+
+.graph-view {
+  display: grid; grid-template-columns: 1fr 280px; gap: 16px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+}
+.graph-svg { width: 100%; height: auto; background: #0c0e12; border-radius: 8px; }
+.graph-edge { stroke: var(--border); stroke-width: 1.5; }
+.graph-node { cursor: pointer; }
+.graph-node circle { stroke: #0c0e12; stroke-width: 2; transition: r 0.1s; }
+.graph-node.selected circle { stroke: var(--text); stroke-width: 3; }
+.graph-node-label { fill: var(--muted); font-size: 11px; pointer-events: none; }
+
+.graph-detail { border-left: 1px solid var(--border); padding-left: 14px; }
+.graph-detail-type { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.graph-detail h3 { margin: 4px 0 8px; font-size: 17px; }
+.graph-detail p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; color: var(--text); }
+.graph-detail .differentiator { color: var(--muted); }
+.graph-detail-meta { list-style: none; display: flex; gap: 10px; padding: 0; margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+.graph-detail-link { display: inline-block; margin-top: 8px; color: var(--accent); text-decoration: none; }
+.graph-detail-link:hover { text-decoration: underline; }
+
+.graph-legend { list-style: none; display: flex; flex-wrap: wrap; gap: 12px; padding: 10px 2px 0; margin: 0; grid-column: 1 / -1; }
+.graph-legend li { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.legend-swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
