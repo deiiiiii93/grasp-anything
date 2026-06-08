@@ -1,4 +1,5 @@
 import type { BriefDoc } from "@grasp/schema";
+import { safeHref } from "./url";
 
 const CONCEPT_CLASSDEF = [
   "classDef idea fill:#f5c451,stroke:#caa23c,color:#1a1a1a;",
@@ -42,7 +43,7 @@ export function landscapeToMermaid(doc: BriefDoc): string {
   }
   for (const n of doc.landscapeGraph.nodes) {
     if (n.type === "alternative" && n.url) {
-      lines.push(`  click ${n.id} "${n.url}" _blank`);
+      lines.push(`  click ${n.id} "${safeHref(n.url)}" _blank`);
     }
   }
   for (const c of LANDSCAPE_CLASSDEF) lines.push(`  ${c}`);

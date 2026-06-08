@@ -1,5 +1,6 @@
 import type { BriefDoc } from "@grasp/schema";
 import { conceptToMermaid, landscapeToMermaid } from "./mermaid";
+import { safeHref } from "./url";
 
 const SECTIONS: { key: "idea" | "problem" | "why" | "how" | "takeaway"; title: string }[] = [
   { key: "idea", title: "Idea" },
@@ -37,7 +38,7 @@ export function briefToMarkdown(doc: BriefDoc): string {
     for (const id of cited) {
       const e = byId.get(id);
       if (!e) continue;
-      const src = e.url ? `[${e.source}](${e.url})` : e.source;
+      const src = e.url ? `[${e.source}](${safeHref(e.url)})` : e.source;
       out.push(`[^${id}]: ${e.claim} — ${src} (${e.verified ? "verified" : "inferred"})`);
     }
   }

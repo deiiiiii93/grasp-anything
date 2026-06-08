@@ -1,5 +1,6 @@
 import type { BriefDoc } from "@grasp/schema";
 import { conceptToSvg, landscapeToSvg } from "./svg";
+import { safeHref } from "./url";
 
 const SECTIONS: { key: "idea" | "problem" | "why" | "how" | "takeaway"; title: string }[] = [
   { key: "idea", title: "Idea" },
@@ -31,7 +32,11 @@ sup { color: #b36; font-size: 11px; }
 `;
 
 function esc(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 export function briefToPrintHtml(doc: BriefDoc): string {
@@ -60,7 +65,7 @@ export function briefToPrintHtml(doc: BriefDoc): string {
       ? `<div class="refs"><strong>References</strong><ol>${refs
           .map((id) => {
             const e = byId.get(id)!;
-            const src = e.url ? `<a href="${esc(e.url)}">${esc(e.source)}</a>` : esc(e.source);
+            const src = e.url ? `<a href="${esc(safeHref(e.url))}">${esc(e.source)}</a>` : esc(e.source);
             const tag = e.verified ? "verified" : `<span class="inferred">inferred</span>`;
             return `<li>${esc(e.claim)} — ${src} (${tag})</li>`;
           })
@@ -68,7 +73,7 @@ export function briefToPrintHtml(doc: BriefDoc): string {
       : "";
 
   const title = doc.meta.url
-    ? `<a href="${esc(doc.meta.url)}">${esc(doc.meta.repo)}</a>`
+    ? `<a href="${esc(safeHref(doc.meta.url))}">${esc(doc.meta.repo)}</a>`
     : esc(doc.meta.repo);
 
   return `<!doctype html>
