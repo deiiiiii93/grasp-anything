@@ -4,9 +4,12 @@ import { join } from "node:path";
 const HOOK = `#!/bin/sh
 # Installed by grasp --auto-update. Flags which strategic-brief streams a commit
 # made stale; it does not regenerate the brief (that needs the LLM agents — run /grasp).
-grasp-state --target "$(git rev-parse --show-toplevel)" \\
-  --sources "$(git rev-parse --show-toplevel)/.grasp/sources.json" --dry-run 2>/dev/null \\
-  && echo "grasp: brief may be stale — run /grasp to refresh."
+ROOT="$(git rev-parse --show-toplevel)"
+verdict=$(grasp-state --target "$ROOT" --sources "$ROOT/.grasp/sources.json" --dry-run 2>/dev/null) || exit 0
+case "$verdict" in
+  *'"essence":true'*|*'"success":true'*|*'"landscape":true'*)
+    echo "grasp: brief is stale ($verdict) — run /grasp to refresh." ;;
+esac
 `;
 
 function gitHooksDir(targetDir: string): string {

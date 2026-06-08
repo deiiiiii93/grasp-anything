@@ -60,7 +60,7 @@ export function runCli(argv: string[]): number {
   const { fragmentsDir, target, dist, prior, stale } = parseArgs(argv);
   if (!fragmentsDir || !target || !dist) {
     console.error(
-      "usage: grasp-assemble <fragmentsDir> --target <repoDir> --dist <dashboardDist>",
+      "usage: grasp-assemble <fragmentsDir> --target <repoDir> --dist <dashboardDist> [--prior <priorBrief>] [--stale <streams>]",
     );
     return 2;
   }

@@ -22,6 +22,8 @@ describe("auto-update install/remove", () => {
     const hook = readFileSync(hookPath(dir), "utf8");
     expect(hook).toContain("grasp-state");
     expect(hook).toContain("--dry-run");
+    // only reminds when a stream is actually stale (not on every commit)
+    expect(hook).toContain('"essence":true');
     expect(statSync(hookPath(dir)).mode & 0o100).toBe(0o100);
   });
 
