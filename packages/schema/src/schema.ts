@@ -173,3 +173,12 @@ export const BriefDocSchema = z
   });
 
 export type BriefDoc = z.infer<typeof BriefDocSchema>;
+
+export {
+  ConceptNode as ConceptNodeSchema,
+  ConceptEdge as ConceptEdgeSchema,
+  LandscapeNode as LandscapeNodeSchema,
+  LandscapeEdge as LandscapeEdgeSchema,
+  Evidence as EvidenceSchema,
+  Meta as MetaSchema,
+};
