@@ -16,7 +16,11 @@ async function boot() {
     const raw = await res.json();
     const { ok, errors, data } = validateBrief(raw);
     if (!ok || !data) {
-      root.render(<ErrorScreen message={`Invalid repo-brief.json:\n${errors.join("\n")}`} />);
+      root.render(
+        <StrictMode>
+          <ErrorScreen message={`Invalid repo-brief.json:\n${errors.join("\n")}`} />
+        </StrictMode>,
+      );
       return;
     }
     root.render(
@@ -25,7 +29,12 @@ async function boot() {
       </StrictMode>,
     );
   } catch (err) {
-    root.render(<ErrorScreen message={`Could not load repo-brief.json: ${(err as Error).message}`} />);
+    const message = err instanceof Error ? err.message : String(err);
+    root.render(
+      <StrictMode>
+        <ErrorScreen message={`Could not load repo-brief.json: ${message}`} />
+      </StrictMode>,
+    );
   }
 }
 
