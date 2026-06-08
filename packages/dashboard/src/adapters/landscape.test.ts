@@ -42,4 +42,19 @@ describe("layoutLandscape", () => {
     }
     expect(layout.edges).toHaveLength(3);
   });
+
+  it("is deterministic (same input → identical coordinates)", () => {
+    const a = layoutLandscape(sampleDoc, 640, 480);
+    const b = layoutLandscape(sampleDoc, 640, 480);
+    expect(a.nodes.map((n) => [n.id, n.x, n.y])).toEqual(b.nodes.map((n) => [n.id, n.x, n.y]));
+  });
+
+  it("falls back to mid radius when an alternative has no similarity", () => {
+    const doc = JSON.parse(JSON.stringify(sampleDoc));
+    delete doc.landscapeGraph.nodes.find((n: { id: string }) => n.id === "alt1").similarity;
+    const layout = layoutLandscape(doc, 640, 480);
+    const alt = layout.nodes.find((n) => n.id === "alt1")!;
+    // minR 70 + (1 - 0.5 fallback) * (maxR 180 - minR 70) = 125
+    expect(Math.hypot(alt.x - 320, alt.y - 240)).toBeCloseTo(125, 5);
+  });
 });

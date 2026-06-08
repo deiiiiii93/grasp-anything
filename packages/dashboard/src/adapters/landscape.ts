@@ -32,7 +32,8 @@ export interface LandscapeLayout {
   height: number;
 }
 
-const CATEGORY_COLORS = ["#5aa9f0", "#5bd1a0", "#b794f6", "#e5687a", "#f5c451"];
+// Gold (#f5c451) is reserved for the self node, so it is intentionally absent here.
+const CATEGORY_COLORS = ["#5aa9f0", "#5bd1a0", "#b794f6", "#e5687a"];
 const SELF_COLOR = "#f5c451";
 const DEFAULT_COLOR = "#9aa3b2";
 
