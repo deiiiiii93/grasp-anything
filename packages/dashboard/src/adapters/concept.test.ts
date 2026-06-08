@@ -20,6 +20,12 @@ describe("layoutConcept", () => {
     }
   });
 
+  it("orders ring nodes by type priority then input order", () => {
+    const layout = layoutConcept(sampleDoc, 640, 480);
+    const ringTypes = layout.nodes.filter((n) => n.type !== "idea").map((n) => n.type);
+    expect(ringTypes).toEqual(["problem", "mechanism", "mechanism", "outcome", "feature"]);
+  });
+
   it("resolves node evidence (the outcome node cites ev1)", () => {
     const layout = layoutConcept(sampleDoc, 640, 480);
     const outcome = layout.nodes.find((n) => n.id === "o1")!;
