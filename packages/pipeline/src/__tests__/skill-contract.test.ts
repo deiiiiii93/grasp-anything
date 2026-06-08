@@ -16,12 +16,18 @@ describe("SKILL.md orchestrator contract", () => {
   it("references the real moving parts (drift guard)", () => {
     for (const token of [
       "grasp-assemble",
+      "grasp-state",
       "essence-analyzer",
       "success-analyzer",
       "landscape-analyzer",
       "depth",
       "broadness",
       ".grasp",
+      "Phase 0.5",
+      "state.json",
+      "--full",
+      "--auto-update",
+      "--prior",
     ]) {
       expect(md).toContain(token);
     }
