@@ -5,7 +5,10 @@
   "private": true,
   "main": "src/index.ts",
   "types": "src/index.ts",
-  "bin": { "grasp-assemble": "src/cli.ts" },
+  "bin": {
+    "grasp-assemble": "src/cli.ts",
+    "grasp-state": "src/state-cli.ts"
+  },
   "scripts": {
     "assemble": "tsx src/cli.ts",
     "test": "vitest run",
