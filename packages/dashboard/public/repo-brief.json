@@ -1,0 +1,57 @@
+{
+  "meta": {
+    "repo": "Lum1104/Understand-Anything",
+    "url": "https://github.com/Lum1104/Understand-Anything",
+    "analyzedAt": "2026-06-08T12:00:00Z",
+    "depth": "skim",
+    "broadness": "web",
+    "signals": { "stars": 1200, "lastCommit": "2026-06-01", "language": "TypeScript" }
+  },
+  "brief": {
+    "idea": "Turn any codebase into an interactive knowledge graph so newcomers can grasp its architecture without reading every file.",
+    "problem": "Onboarding into an unfamiliar codebase is slow and intimidating; engineers must reverse-engineer structure from scattered files.",
+    "why": "It packages a heavy LLM analysis pipeline behind a one-command plugin and renders results in a polished dashboard, lowering the effort to near zero.",
+    "how": "LLM sub-agents analyze files in batches and emit a validated JSON graph; a deterministic core validates and fingerprints it; a React dashboard renders it with layered layout.",
+    "takeaway": "Worth it if you regularly onboard onto large or unfamiliar repos.",
+    "updatedAt": {
+      "essence": "2026-06-08T12:00:00Z",
+      "success": "2026-06-08T12:00:00Z",
+      "landscape": "2026-06-08T12:00:00Z"
+    },
+    "evidence": { "why": ["ev1"] }
+  },
+  "conceptGraph": {
+    "nodes": [
+      { "id": "p1", "type": "problem", "label": "Codebases are hard to onboard into", "detail": "Structure is implicit and spread across many files.", "evidenceIds": [] },
+      { "id": "idea1", "type": "idea", "label": "Repo as an interactive knowledge graph", "detail": "Nodes are files/symbols; edges are imports/calls.", "evidenceIds": [] },
+      { "id": "m1", "type": "mechanism", "label": "LLM agents emit a validated JSON graph", "detail": "Batched file analysis by sub-agents.", "evidenceIds": [] },
+      { "id": "m2", "type": "mechanism", "label": "Deterministic core validates and fingerprints", "detail": "Schema validation + change detection.", "evidenceIds": [] },
+      { "id": "o1", "type": "outcome", "label": "Interactive architecture dashboard", "detail": "Layered, zoomable graph view.", "evidenceIds": ["ev1"] },
+      { "id": "f1", "type": "feature", "label": "Incremental graph updates on commit", "detail": "Only changed files are re-analyzed.", "evidenceIds": [] }
+    ],
+    "edges": [
+      { "id": "ce1", "source": "idea1", "target": "p1", "type": "addresses" },
+      { "id": "ce2", "source": "idea1", "target": "m1", "type": "composedOf" },
+      { "id": "ce3", "source": "idea1", "target": "m2", "type": "composedOf" },
+      { "id": "ce4", "source": "m1", "target": "o1", "type": "enables" },
+      { "id": "ce5", "source": "m2", "target": "f1", "type": "produces" }
+    ]
+  },
+  "landscapeGraph": {
+    "nodes": [
+      { "id": "self1", "type": "self", "name": "Understand-Anything", "url": "https://github.com/Lum1104/Understand-Anything", "stars": 1200, "category": "cat1", "evidenceIds": [] },
+      { "id": "alt1", "type": "alternative", "name": "Sourcegraph Cody", "url": "https://github.com/sourcegraph/cody", "stars": 3000, "oneLiner": "AI coding assistant with codebase context.", "similarity": 0.55, "differentiator": "Commercial, IDE-embedded, not a static graph.", "category": "cat1", "evidenceIds": ["ev2"] },
+      { "id": "alt2", "type": "alternative", "name": "CodeSee", "url": "https://github.com/Codesee-io", "stars": 800, "oneLiner": "Visual maps of a codebase.", "similarity": 0.7, "differentiator": "Hosted SaaS; less LLM-driven narrative.", "category": "cat1", "evidenceIds": [] },
+      { "id": "cat1", "type": "category", "label": "Code comprehension tools", "evidenceIds": [] }
+    ],
+    "edges": [
+      { "id": "le1", "source": "alt1", "target": "self1", "type": "alternativeTo" },
+      { "id": "le2", "source": "alt2", "target": "self1", "type": "competesWith" },
+      { "id": "le3", "source": "alt1", "target": "alt2", "type": "sharesApproach" }
+    ]
+  },
+  "evidence": [
+    { "id": "ev1", "claim": "Ships an interactive web dashboard", "source": "README", "url": "https://github.com/Lum1104/Understand-Anything", "verified": true },
+    { "id": "ev2", "claim": "Cody has 3k+ GitHub stars", "source": "GitHub", "url": "https://github.com/sourcegraph/cody", "verified": true }
+  ]
+}
