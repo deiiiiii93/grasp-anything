@@ -7,7 +7,8 @@
   "types": "src/index.ts",
   "bin": {
     "grasp-assemble": "src/cli.ts",
-    "grasp-state": "src/state-cli.ts"
+    "grasp-state": "src/state-cli.ts",
+    "grasp-autoupdate": "src/autoupdate-cli.ts"
   },
   "scripts": {
     "assemble": "tsx src/cli.ts",
