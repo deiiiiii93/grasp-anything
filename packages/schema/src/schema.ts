@@ -77,12 +77,75 @@ const Brief = z.object({
   }),
 });
 
-export const BriefDocSchema = z.object({
-  meta: Meta,
-  brief: Brief,
-  conceptGraph: z.object({ nodes: z.array(ConceptNode), edges: z.array(ConceptEdge) }),
-  landscapeGraph: z.object({ nodes: z.array(LandscapeNode), edges: z.array(LandscapeEdge) }),
-  evidence: z.array(Evidence),
-});
+export const BriefDocSchema = z
+  .object({
+    meta: Meta,
+    brief: Brief,
+    conceptGraph: z.object({ nodes: z.array(ConceptNode), edges: z.array(ConceptEdge) }),
+    landscapeGraph: z.object({ nodes: z.array(LandscapeNode), edges: z.array(LandscapeEdge) }),
+    evidence: z.array(Evidence),
+  })
+  .superRefine((doc, ctx) => {
+    const ideaCount = doc.conceptGraph.nodes.filter((n) => n.type === "idea").length;
+    if (ideaCount !== 1) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `conceptGraph must have exactly one 'idea' node, found ${ideaCount}`,
+        path: ["conceptGraph", "nodes"],
+      });
+    }
+
+    const selfCount = doc.landscapeGraph.nodes.filter((n) => n.type === "self").length;
+    if (selfCount !== 1) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `landscapeGraph must have exactly one 'self' node, found ${selfCount}`,
+        path: ["landscapeGraph", "nodes"],
+      });
+    }
+
+    const conceptIds = new Set(doc.conceptGraph.nodes.map((n) => n.id));
+    doc.conceptGraph.edges.forEach((e, i) => {
+      if (!conceptIds.has(e.source)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `concept edge '${e.id}' source '${e.source}' not found`, path: ["conceptGraph", "edges", i, "source"] });
+      }
+      if (!conceptIds.has(e.target)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `concept edge '${e.id}' target '${e.target}' not found`, path: ["conceptGraph", "edges", i, "target"] });
+      }
+    });
+
+    const landIds = new Set(doc.landscapeGraph.nodes.map((n) => n.id));
+    doc.landscapeGraph.edges.forEach((e, i) => {
+      if (!landIds.has(e.source)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `landscape edge '${e.id}' source '${e.source}' not found`, path: ["landscapeGraph", "edges", i, "source"] });
+      }
+      if (!landIds.has(e.target)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `landscape edge '${e.id}' target '${e.target}' not found`, path: ["landscapeGraph", "edges", i, "target"] });
+      }
+    });
+
+    const evidenceIds = new Set(doc.evidence.map((e) => e.id));
+    const checkEvidence = (ids: string[], path: (string | number)[]) => {
+      ids.forEach((id) => {
+        if (!evidenceIds.has(id)) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: `references missing evidence '${id}'`, path });
+        }
+      });
+    };
+    doc.conceptGraph.nodes.forEach((n, i) => checkEvidence(n.evidenceIds, ["conceptGraph", "nodes", i, "evidenceIds"]));
+    doc.landscapeGraph.nodes.forEach((n, i) => checkEvidence(n.evidenceIds, ["landscapeGraph", "nodes", i, "evidenceIds"]));
+
+    doc.landscapeGraph.nodes.forEach((n, i) => {
+      if (n.type === "alternative" && (!n.name || !n.url)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `alternative node '${n.id}' requires both name and url`, path: ["landscapeGraph", "nodes", i] });
+      }
+      if (n.type === "self" && !n.name) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `self node '${n.id}' requires a name`, path: ["landscapeGraph", "nodes", i] });
+      }
+      if (n.type === "category" && !n.label) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `category node '${n.id}' requires a label`, path: ["landscapeGraph", "nodes", i] });
+      }
+    });
+  });
 
 export type BriefDoc = z.infer<typeof BriefDocSchema>;
