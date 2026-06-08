@@ -7,6 +7,7 @@ describe("validateBrief", () => {
     const result = validateBrief(sample);
     expect(result.ok).toBe(true);
     expect(result.errors).toEqual([]);
+    expect(result.data).toBeDefined();
   });
 
   it("returns flat, readable error strings for an invalid brief", () => {
@@ -16,5 +17,6 @@ describe("validateBrief", () => {
     expect(result.ok).toBe(false);
     expect(result.errors.length).toBeGreaterThan(0);
     expect(result.errors[0]).toContain("brief.idea");
+    expect(result.data).toBeUndefined();
   });
 });
