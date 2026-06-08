@@ -15,18 +15,33 @@ const LANDSCAPE_CLASSDEF = [
   "classDef category fill:#d8dee9,stroke:#aab4c4,color:#1a1a1a;",
 ];
 
-/** Mermaid labels are wrapped in double quotes, so quotes inside become entities and newlines collapse. */
+/**
+ * Mermaid node labels come from an untrusted brief and are wrapped in `["..."]`,
+ * so all HTML-significant characters become entities (a label like `<script>` must
+ * not survive into the block for a loose-mode renderer to execute) and whitespace collapses.
+ */
 function label(text: string): string {
-  return text.replace(/"/g, "&quot;").replace(/\s+/g, " ").trim();
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Node ids are emitted as bare Mermaid identifiers; untrusted ids are reduced to a safe slug so they can't inject syntax. (Applied consistently to node, edge, and click references.) */
+function nodeId(id: string): string {
+  return id.replace(/[^A-Za-z0-9_]/g, "_");
 }
 
 export function conceptToMermaid(doc: BriefDoc): string {
   const lines = ["flowchart TD"];
   for (const n of doc.conceptGraph.nodes) {
-    lines.push(`  ${n.id}["${label(n.label)}"]:::${n.type}`);
+    lines.push(`  ${nodeId(n.id)}["${label(n.label)}"]:::${n.type}`);
   }
   for (const e of doc.conceptGraph.edges) {
-    lines.push(`  ${e.source} -->|${e.type}| ${e.target}`);
+    lines.push(`  ${nodeId(e.source)} -->|${e.type}| ${nodeId(e.target)}`);
   }
   for (const c of CONCEPT_CLASSDEF) lines.push(`  ${c}`);
   return lines.join("\n");
@@ -36,14 +51,14 @@ export function landscapeToMermaid(doc: BriefDoc): string {
   const lines = ["flowchart LR"];
   for (const n of doc.landscapeGraph.nodes) {
     const text = n.name ?? n.label ?? n.id;
-    lines.push(`  ${n.id}["${label(text)}"]:::${n.type}`);
+    lines.push(`  ${nodeId(n.id)}["${label(text)}"]:::${n.type}`);
   }
   for (const e of doc.landscapeGraph.edges) {
-    lines.push(`  ${e.source} -->|${e.type}| ${e.target}`);
+    lines.push(`  ${nodeId(e.source)} -->|${e.type}| ${nodeId(e.target)}`);
   }
   for (const n of doc.landscapeGraph.nodes) {
     if (n.type === "alternative" && n.url) {
-      lines.push(`  click ${n.id} "${safeHref(n.url)}" _blank`);
+      lines.push(`  click ${nodeId(n.id)} "${safeHref(n.url)}" _blank`);
     }
   }
   for (const c of LANDSCAPE_CLASSDEF) lines.push(`  ${c}`);

@@ -4,6 +4,7 @@ import sample from "@grasp/schema/sample-brief.json";
 import { safeHref } from "../url";
 import { briefToPrintHtml } from "../printHtml";
 import { briefToMarkdown } from "../markdown";
+import { conceptToMermaid } from "../mermaid";
 
 describe("safeHref", () => {
   it("passes http/https/mailto through", () => {
@@ -40,5 +41,22 @@ describe("export XSS hardening", () => {
     d.evidence[0].url = "javascript:alert(1)";
     const md = briefToMarkdown(validateBrief(d).data!);
     expect(md).not.toContain("javascript:alert(1)");
+  });
+
+  it("Markdown escapes link-breaking characters in evidence links", () => {
+    const d = JSON.parse(JSON.stringify(sample));
+    d.evidence[0].url = "https://x.com/a)b";
+    d.evidence[0].source = "src]injected";
+    const md = briefToMarkdown(validateBrief(d).data!);
+    expect(md).toContain("%29"); // the ")" in the url is percent-encoded
+    expect(md).toContain("src\\]injected"); // the "]" in the link text is escaped
+  });
+
+  it("Mermaid escapes angle brackets in untrusted node labels", () => {
+    const d = JSON.parse(JSON.stringify(sample));
+    d.conceptGraph.nodes[0].label = '"><script>alert(1)</script>';
+    const out = conceptToMermaid(validateBrief(d).data!);
+    expect(out).not.toContain("<script>");
+    expect(out).toContain("&lt;script&gt;");
   });
 });

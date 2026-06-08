@@ -38,7 +38,12 @@ export function briefToMarkdown(doc: BriefDoc): string {
     for (const id of cited) {
       const e = byId.get(id);
       if (!e) continue;
-      const src = e.url ? `[${e.source}](${safeHref(e.url)})` : e.source;
+      // Escape `]` in the link text and `()` in the destination so an untrusted
+      // source/url can't break out of the `[text](url)` syntax and inject markdown.
+      const linkText = e.source.replace(/[[\]]/g, "\\$&");
+      const src = e.url
+        ? `[${linkText}](${safeHref(e.url).replace(/[()]/g, (c) => (c === "(" ? "%28" : "%29"))})`
+        : e.source;
       out.push(`[^${id}]: ${e.claim} — ${src} (${e.verified ? "verified" : "inferred"})`);
     }
   }
