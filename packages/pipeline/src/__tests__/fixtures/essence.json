@@ -1,0 +1,26 @@
+{
+  "idea": "Turn any codebase into an interactive knowledge graph so newcomers can grasp its architecture without reading every file.",
+  "problem": "Onboarding into an unfamiliar codebase is slow and intimidating; engineers must reverse-engineer structure from scattered files.",
+  "how": "LLM sub-agents analyze files in batches and emit a validated JSON graph; a deterministic core validates and fingerprints it; a React dashboard renders it with layered layout.",
+  "conceptGraph": {
+    "nodes": [
+      { "id": "p1", "type": "problem", "label": "Codebases are hard to onboard into", "detail": "Structure is implicit and spread across many files.", "evidenceIds": [] },
+      { "id": "idea1", "type": "idea", "label": "Repo as an interactive knowledge graph", "detail": "Nodes are files/symbols; edges are imports/calls.", "evidenceIds": [] },
+      { "id": "m1", "type": "mechanism", "label": "LLM agents emit a validated JSON graph", "detail": "Batched file analysis by sub-agents.", "evidenceIds": [] },
+      { "id": "m2", "type": "mechanism", "label": "Deterministic core validates and fingerprints", "detail": "Schema validation + change detection.", "evidenceIds": [] },
+      { "id": "o1", "type": "outcome", "label": "Interactive architecture dashboard", "detail": "Layered, zoomable graph view.", "evidenceIds": ["ev1"] },
+      { "id": "f1", "type": "feature", "label": "Incremental graph updates on commit", "detail": "Only changed files are re-analyzed.", "evidenceIds": [] }
+    ],
+    "edges": [
+      { "id": "ce1", "source": "idea1", "target": "p1", "type": "addresses" },
+      { "id": "ce2", "source": "idea1", "target": "m1", "type": "composedOf" },
+      { "id": "ce3", "source": "idea1", "target": "m2", "type": "composedOf" },
+      { "id": "ce4", "source": "m1", "target": "o1", "type": "enables" },
+      { "id": "ce5", "source": "m2", "target": "f1", "type": "produces" }
+    ]
+  },
+  "evidence": [
+    { "id": "ev1", "claim": "Ships an interactive web dashboard", "source": "README", "url": "https://github.com/Lum1104/Understand-Anything", "verified": true }
+  ],
+  "briefEvidence": {}
+}

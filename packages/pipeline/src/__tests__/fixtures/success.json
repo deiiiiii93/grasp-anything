@@ -1,0 +1,6 @@
+{
+  "why": "It packages a heavy LLM analysis pipeline behind a one-command plugin and renders results in a polished dashboard, lowering the effort to near zero.",
+  "takeaway": "Worth it if you regularly onboard onto large or unfamiliar repos.",
+  "evidence": [],
+  "briefEvidence": { "why": ["ev1"] }
+}
