@@ -331,3 +331,31 @@ render beautifully, no agent tuning will save it.
 6. `.claude-plugin/plugin.json` + wiring; end-to-end run on a real public repo.
 
 Steps 1–2 and 3 can proceed in parallel once the schema (step 1) is fixed.
+
+---
+
+## 11. Open Contract Decisions (raised by Plan 1 final review)
+
+Plan 1 (`packages/schema`) is implemented and validated. Its final review surfaced
+contract questions to resolve **before Plan 2 (dashboard) starts**, since they may
+alter `repo-brief.json`. All are additive/optional, so deferring is safe, but the
+choice should be conscious:
+
+1. **Evidence on prose claims (highest priority).** §4/§5 promise "inline evidence
+   tooltips" on the five `brief.*` prose cards, but the contract currently attaches
+   `evidenceIds` only to graph nodes — the `brief` object has no evidence-reference
+   field. Decide before Plan 2 whether prose cards cite evidence directly (e.g. add
+   optional `brief.evidence: { idea?: string[], why?: string[], ... }`) or tooltips
+   key off graph nodes only. This is the most likely future breaking change.
+2. **`category` linkage is an unchecked free string.** `self`/`alternative` nodes
+   carry `category: "cat1"`, but no cross-field rule requires it to resolve to an
+   existing `category`-type node (unlike edges/evidence, which are checked). Add a
+   reference check if Plan 2's clustering needs the guarantee.
+3. **Timestamps validated as non-empty strings, not ISO datetimes.** `meta.analyzedAt`
+   and `brief.updatedAt.*` use `z.string().min(1)`. Plan 4 compares these for
+   freshness — consider tightening to `z.string().datetime()` then (note `meta.signals.lastCommit`
+   is intentionally date-only and must stay loose).
+4. **`LandscapeNode` is one permissive object** (all type-specific fields optional,
+   required fields enforced via `superRefine`). Downstream code must not infer field
+   absence from node `type`. A discriminated union is the stricter alternative if this
+   becomes error-prone.
