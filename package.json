@@ -1,0 +1,8 @@
+{
+  "name": "grasp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "engines": { "node": ">=22" }
+}
