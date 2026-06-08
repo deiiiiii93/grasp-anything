@@ -14,6 +14,7 @@ export function Header({ signals }: { signals: SignalsVM }) {
       </div>
       <p className="verdict">{signals.takeaway}</p>
       <ul className="signal-chips">
+        {/* en-US locale pins thousands formatting for deterministic output/tests. */}
         {signals.stars !== undefined && <li className="chip">★ {signals.stars.toLocaleString("en-US")}</li>}
         {signals.language && <li className="chip">{signals.language}</li>}
         <li className="chip">depth: {signals.depth}</li>

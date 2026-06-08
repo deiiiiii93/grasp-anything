@@ -8,6 +8,10 @@ export function EvidenceChips({ evidence }: { evidence: EvidenceChip[] }) {
         <span
           key={e.id}
           data-testid="evidence-chip"
+          role="img"
+          // role="img" + aria-label conveys the verified/inferred status to assistive
+          // tech, so the meaning is not carried by color (and the hover-only title) alone.
+          aria-label={`Evidence ${i + 1}: ${e.claim} — ${e.source} (${e.verified ? "verified" : "inferred"})`}
           className={`evidence-chip ${e.verified ? "verified" : "inferred"}`}
           title={`${e.claim} — ${e.source} (${e.verified ? "verified" : "inferred"})`}
         >

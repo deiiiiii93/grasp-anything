@@ -17,6 +17,8 @@ describe("EvidenceChips", () => {
     expect(rendered[0]).toHaveClass("verified");
     expect(rendered[1]).toHaveClass("inferred");
     expect(rendered[0]).toHaveAttribute("title", expect.stringContaining("Ships a dashboard"));
+    expect(rendered[0]).toHaveAttribute("aria-label", expect.stringContaining("verified"));
+    expect(rendered[1]).toHaveAttribute("aria-label", expect.stringContaining("inferred"));
   });
 
   it("renders nothing when there is no evidence", () => {
@@ -57,5 +59,11 @@ describe("Header", () => {
     expect(screen.getByText("TypeScript")).toBeInTheDocument();
     expect(screen.getByText("depth: skim")).toBeInTheDocument();
     expect(screen.getByText("scope: web")).toBeInTheDocument();
+  });
+
+  it("renders the repo as plain text (no link) when url is absent", () => {
+    render(<Header signals={{ ...signals, url: undefined }} />);
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.getByText("owner/repo")).toBeInTheDocument();
   });
 });
