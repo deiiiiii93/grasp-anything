@@ -1,0 +1,6 @@
+{
+  "name": "grasp",
+  "version": "0.1.0",
+  "description": "Produce a strategic brief of any repository — its main idea, the problem it solves, why it succeeds, how it works, and the competitive landscape — as interactive graphs and a self-contained HTML report.",
+  "author": { "name": "grasp" }
+}
