@@ -44,6 +44,14 @@ describe("cross-field rules", () => {
     expect(JSON.stringify(r)).toContain("nope");
   });
 
+  it("rejects a landscape edge with a dangling endpoint", () => {
+    const bad = clone();
+    bad.landscapeGraph.edges.push({ id: "leX", source: "self1", target: "ghost", type: "competesWith" });
+    const r = BriefDocSchema.safeParse(bad);
+    expect(r.success).toBe(false);
+    expect(JSON.stringify(r)).toContain("ghost");
+  });
+
   it("rejects a node referencing missing evidence", () => {
     const bad = clone();
     bad.conceptGraph.nodes[0].evidenceIds = ["ghost"];

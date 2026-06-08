@@ -125,10 +125,10 @@ export const BriefDocSchema = z
     });
 
     const evidenceIds = new Set(doc.evidence.map((e) => e.id));
-    const checkEvidence = (ids: string[], path: (string | number)[]) => {
-      ids.forEach((id) => {
+    const checkEvidence = (ids: string[], basePath: (string | number)[]) => {
+      ids.forEach((id, j) => {
         if (!evidenceIds.has(id)) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, message: `references missing evidence '${id}'`, path });
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: `references missing evidence '${id}'`, path: [...basePath, j] });
         }
       });
     };
