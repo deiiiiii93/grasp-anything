@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
+  "exports": {
+    "./adapters": "./src/adapters/index.ts"
+  },
   "scripts": {
     "sync-sample": "node scripts/copy-sample.mjs",
     "dev": "npm run sync-sample && vite",
