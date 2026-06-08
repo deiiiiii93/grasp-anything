@@ -23,4 +23,11 @@ describe("ConceptGraph", () => {
     expect(within(detail).getByRole("heading")).toHaveTextContent("Interactive architecture dashboard");
     expect(within(detail).getAllByTestId("evidence-chip")).toHaveLength(1);
   });
+
+  it("selects a node via keyboard (Enter)", () => {
+    render(<ConceptGraph doc={sampleDoc} />);
+    fireEvent.keyDown(screen.getByTestId("concept-node-m1"), { key: "Enter" });
+    const detail = screen.getByTestId("concept-detail");
+    expect(within(detail).getByRole("heading")).toHaveTextContent("LLM agents emit a validated JSON graph");
+  });
 });

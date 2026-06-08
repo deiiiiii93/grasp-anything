@@ -23,7 +23,7 @@ export function ConceptGraph({ doc }: { doc: BriefDoc }) {
       <svg
         className="graph-svg"
         viewBox={`0 0 ${layout.width} ${layout.height}`}
-        role="img"
+        role="group"
         aria-label="Concept map"
       >
         {layout.edges.map((e) => {
@@ -32,20 +32,33 @@ export function ConceptGraph({ doc }: { doc: BriefDoc }) {
           if (!s || !t) return null;
           return <line key={e.id} className="graph-edge" x1={s.x} y1={s.y} x2={t.x} y2={t.y} />;
         })}
-        {layout.nodes.map((n) => (
-          <g
-            key={n.id}
-            data-testid={`concept-node-${n.id}`}
-            className={`graph-node${n.id === selectedId ? " selected" : ""}`}
-            transform={`translate(${n.x}, ${n.y})`}
-            onClick={() => setSelectedId(n.id)}
-          >
-            <circle r={n.type === "idea" ? 22 : 14} fill={TYPE_COLORS[n.type] ?? "var(--muted)"} />
-            <text className="graph-node-label" y={-22} textAnchor="middle">
-              {n.label}
-            </text>
-          </g>
-        ))}
+        {layout.nodes.map((n) => {
+          const radius = n.type === "idea" ? 22 : 14;
+          return (
+            <g
+              key={n.id}
+              data-testid={`concept-node-${n.id}`}
+              className={`graph-node${n.id === selectedId ? " selected" : ""}`}
+              transform={`translate(${n.x}, ${n.y})`}
+              role="button"
+              tabIndex={0}
+              aria-label={n.label}
+              aria-pressed={n.id === selectedId}
+              onClick={() => setSelectedId(n.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelectedId(n.id);
+                }
+              }}
+            >
+              <circle r={radius} fill={TYPE_COLORS[n.type] ?? "var(--muted)"} />
+              <text className="graph-node-label" y={-radius - 8} textAnchor="middle">
+                {n.label}
+              </text>
+            </g>
+          );
+        })}
       </svg>
       <aside className="graph-detail" data-testid="concept-detail">
         <span className="graph-detail-type">{selected.type}</span>
