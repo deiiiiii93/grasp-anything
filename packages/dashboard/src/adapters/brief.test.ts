@@ -11,6 +11,15 @@ describe("resolveEvidence", () => {
   it("ignores unknown ids", () => {
     expect(resolveEvidence(sampleDoc, ["nope"])).toEqual([]);
   });
+
+  it("preserves the inferred (verified: false) flag", () => {
+    const doc = {
+      ...sampleDoc,
+      evidence: [{ id: "evx", claim: "best guess", source: "inference", verified: false }],
+    };
+    const chips = resolveEvidence(doc, ["evx"]);
+    expect(chips[0].verified).toBe(false);
+  });
 });
 
 describe("buildCards", () => {
