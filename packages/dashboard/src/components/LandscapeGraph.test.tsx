@@ -30,6 +30,7 @@ describe("LandscapeGraph", () => {
     const detail = screen.getByTestId("landscape-detail");
     expect(within(detail).getByRole("heading")).toHaveTextContent("Sourcegraph Cody");
     expect(within(detail).getByText(/Commercial, IDE-embedded/)).toBeInTheDocument();
+    expect(within(detail).getByText("similarity 55%")).toBeInTheDocument();
     const link = within(detail).getByRole("link", { name: /View on GitHub/ });
     expect(link).toHaveAttribute("href", "https://github.com/sourcegraph/cody");
   });
