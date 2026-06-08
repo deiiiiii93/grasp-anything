@@ -4,3 +4,4 @@ export * from "./assemble";
 export * from "./render";
 export * from "./state";
 export * from "./fingerprint";
+export * from "./staleness";
