@@ -15,6 +15,8 @@ export interface AssembleInput {
   success: unknown;
   /** Omit (or pass undefined/null) for offline runs — a self-only landscape is synthesized. */
   landscape?: unknown;
+  /** Per-stream timestamp overrides; each present key replaces meta.analyzedAt. Lets incremental runs preserve fresh streams' prior brief.updatedAt. */
+  updatedAt?: { essence?: string; success?: string; landscape?: string };
 }
 
 export type AssembleResult =
@@ -106,9 +108,9 @@ export function assemble(input: AssembleInput): AssembleResult {
       how: essence.how,
       takeaway: success.takeaway,
       updatedAt: {
-        essence: meta.analyzedAt,
-        success: meta.analyzedAt,
-        landscape: meta.analyzedAt,
+        essence: input.updatedAt?.essence ?? meta.analyzedAt,
+        success: input.updatedAt?.success ?? meta.analyzedAt,
+        landscape: input.updatedAt?.landscape ?? meta.analyzedAt,
       },
       ...(briefEvidence ? { evidence: briefEvidence } : {}),
     },
