@@ -1,6 +1,7 @@
 import type { BriefDoc, LandscapeNodeType } from "@grasp/schema";
 import { resolveEvidence, type EvidenceChip } from "./brief";
 import type { GraphEdgeVM } from "./concept";
+import { forceLayout, estimateLabelWidth, type ForceNodeInput } from "./force";
 
 export interface LandscapeNodeVM {
   id: string;
@@ -37,9 +38,10 @@ const CATEGORY_COLORS = ["#5aa9f0", "#5bd1a0", "#b794f6", "#e5687a"];
 const SELF_COLOR = "#f5c451";
 const DEFAULT_COLOR = "#9aa3b2";
 
+export const SELF_RADIUS = 22;
+export const ALT_RADIUS = 14;
+
 export function layoutLandscape(doc: BriefDoc, width = 640, height = 480): LandscapeLayout {
-  const cx = width / 2;
-  const cy = height / 2;
   const minR = 70;
   const maxR = Math.min(width, height) / 2 - 60;
 
@@ -56,32 +58,42 @@ export function layoutLandscape(doc: BriefDoc, width = 640, height = 480): Lands
   const selfNode = doc.landscapeGraph.nodes.find((n) => n.type === "self")!;
   const alternatives = doc.landscapeGraph.nodes.filter((n) => n.type === "alternative");
 
+  // Map similarity → ring distance: a more similar alternative sits closer to self.
+  const ringRadius = (similarity: number | undefined) =>
+    minR + (1 - (similarity ?? 0.5)) * (maxR - minR);
+
+  const ordered = [selfNode, ...alternatives];
+  const forceInputs: ForceNodeInput[] = ordered.map((n) =>
+    n.type === "self"
+      ? { id: n.id, radius: SELF_RADIUS, labelWidth: estimateLabelWidth(n.name ?? n.label ?? n.id), pinned: true }
+      : {
+          id: n.id,
+          radius: ALT_RADIUS,
+          labelWidth: estimateLabelWidth(n.name ?? n.label ?? n.id),
+          targetRadius: ringRadius(n.similarity),
+        },
+  );
+  const pos = forceLayout(forceInputs, doc.landscapeGraph.edges, width, height);
+
   const nodes: LandscapeNodeVM[] = [
     {
       id: selfNode.id,
       kind: selfNode.type,
       label: selfNode.name ?? selfNode.label ?? selfNode.id,
-      x: cx,
-      y: cy,
+      x: pos.get(selfNode.id)!.x,
+      y: pos.get(selfNode.id)!.y,
       url: selfNode.url,
       stars: selfNode.stars,
       categoryId: selfNode.category,
       color: SELF_COLOR,
       evidence: resolveEvidence(doc, selfNode.evidenceIds),
     },
-  ];
-
-  const count = Math.max(alternatives.length, 1);
-  alternatives.forEach((alt, i) => {
-    const angle = -Math.PI / 2 + (i / count) * 2 * Math.PI;
-    const similarity = alt.similarity ?? 0.5;
-    const r = minR + (1 - similarity) * (maxR - minR);
-    nodes.push({
+    ...alternatives.map((alt) => ({
       id: alt.id,
       kind: alt.type,
       label: alt.name ?? alt.label ?? alt.id,
-      x: cx + r * Math.cos(angle),
-      y: cy + r * Math.sin(angle),
+      x: pos.get(alt.id)!.x,
+      y: pos.get(alt.id)!.y,
       url: alt.url,
       stars: alt.stars,
       similarity: alt.similarity,
@@ -90,8 +102,8 @@ export function layoutLandscape(doc: BriefDoc, width = 640, height = 480): Lands
       categoryId: alt.category,
       color: colorFor(alt.category),
       evidence: resolveEvidence(doc, alt.evidenceIds),
-    });
-  });
+    })),
+  ];
 
   const nodeIds = new Set(nodes.map((n) => n.id));
   const edges: GraphEdgeVM[] = doc.landscapeGraph.edges

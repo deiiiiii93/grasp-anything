@@ -30,4 +30,15 @@ describe("ConceptGraph", () => {
     const detail = screen.getByTestId("concept-detail");
     expect(within(detail).getByRole("heading")).toHaveTextContent("LLM agents emit a validated JSON graph");
   });
+
+  it("dims non-neighbors when a node is hovered (idea1 → m1 stays lit, o1 dims)", () => {
+    render(<ConceptGraph doc={sampleDoc} />);
+    fireEvent.mouseEnter(screen.getByTestId("concept-node-idea1"));
+    // m1 is a direct neighbor of idea1; o1 is not (it hangs off m1).
+    expect(screen.getByTestId("concept-node-m1").getAttribute("class")).not.toContain("dim");
+    expect(screen.getByTestId("concept-node-o1").getAttribute("class")).toContain("dim");
+    // Leaving clears the highlight.
+    fireEvent.mouseLeave(screen.getByTestId("concept-node-idea1"));
+    expect(screen.getByTestId("concept-node-o1").getAttribute("class")).not.toContain("dim");
+  });
 });

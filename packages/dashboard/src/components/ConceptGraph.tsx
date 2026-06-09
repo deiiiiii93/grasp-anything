@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { BriefDoc } from "@grasp/schema";
-import { layoutConcept } from "../adapters/concept";
+import { layoutConcept, IDEA_RADIUS, NODE_RADIUS } from "../adapters/concept";
+import { ForceGraph, type ForceGraphNode } from "./ForceGraph";
 import { EvidenceChips } from "./EvidenceChips";
 
 const TYPE_COLORS: Record<string, string> = {
@@ -16,50 +17,29 @@ export function ConceptGraph({ doc }: { doc: BriefDoc }) {
   const idea = layout.nodes.find((n) => n.type === "idea")!;
   const [selectedId, setSelectedId] = useState<string>(idea.id);
   const selected = layout.nodes.find((n) => n.id === selectedId) ?? idea;
-  const byId = new Map(layout.nodes.map((n) => [n.id, n]));
+
+  const fgNodes: ForceGraphNode[] = layout.nodes.map((n) => ({
+    id: n.id,
+    x: n.x,
+    y: n.y,
+    label: n.label,
+    color: TYPE_COLORS[n.type] ?? "var(--muted)",
+    radius: n.type === "idea" ? IDEA_RADIUS : NODE_RADIUS,
+  }));
 
   return (
     <div className="graph-view" data-testid="concept-graph">
-      <svg
-        className="graph-svg"
-        viewBox={`0 0 ${layout.width} ${layout.height}`}
-        role="group"
-        aria-label="Concept map"
-      >
-        {layout.edges.map((e) => {
-          const s = byId.get(e.source);
-          const t = byId.get(e.target);
-          if (!s || !t) return null;
-          return <line key={e.id} className="graph-edge" x1={s.x} y1={s.y} x2={t.x} y2={t.y} />;
-        })}
-        {layout.nodes.map((n) => {
-          const radius = n.type === "idea" ? 22 : 14;
-          return (
-            <g
-              key={n.id}
-              data-testid={`concept-node-${n.id}`}
-              className={`graph-node${n.id === selectedId ? " selected" : ""}`}
-              transform={`translate(${n.x}, ${n.y})`}
-              role="button"
-              tabIndex={0}
-              aria-label={n.label}
-              aria-pressed={n.id === selectedId}
-              onClick={() => setSelectedId(n.id)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setSelectedId(n.id);
-                }
-              }}
-            >
-              <circle r={radius} fill={TYPE_COLORS[n.type] ?? "var(--muted)"} />
-              <text className="graph-node-label" y={-radius - 8} textAnchor="middle">
-                {n.label}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
+      <ForceGraph
+        nodes={fgNodes}
+        edges={layout.edges}
+        width={layout.width}
+        height={layout.height}
+        selectedId={selectedId}
+        onSelect={setSelectedId}
+        pinnedId={idea.id}
+        ariaLabel="Concept map"
+        testIdPrefix="concept"
+      />
       <aside className="graph-detail" data-testid="concept-detail">
         <span className="graph-detail-type">{selected.type}</span>
         <h3>{selected.label}</h3>

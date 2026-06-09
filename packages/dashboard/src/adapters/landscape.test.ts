@@ -49,12 +49,15 @@ describe("layoutLandscape", () => {
     expect(a.nodes.map((n) => [n.id, n.x, n.y])).toEqual(b.nodes.map((n) => [n.id, n.x, n.y]));
   });
 
-  it("falls back to mid radius when an alternative has no similarity", () => {
+  it("places an alternative with no similarity near the mid ring", () => {
     const doc = JSON.parse(JSON.stringify(sampleDoc));
     delete doc.landscapeGraph.nodes.find((n: { id: string }) => n.id === "alt1").similarity;
     const layout = layoutLandscape(doc, 640, 480);
     const alt = layout.nodes.find((n) => n.id === "alt1")!;
-    // minR 70 + (1 - 0.5 fallback) * (maxR 180 - minR 70) = 125
-    expect(Math.hypot(alt.x - 320, alt.y - 240)).toBeCloseTo(125, 5);
+    // Fallback similarity 0.5 → radial target minR 70 + 0.5*(maxR 180 - 70) = 125.
+    // The force settles near that ring rather than exactly on it.
+    const dist = Math.hypot(alt.x - 320, alt.y - 240);
+    expect(dist).toBeGreaterThan(95);
+    expect(dist).toBeLessThan(160);
   });
 });

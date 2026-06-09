@@ -1,5 +1,6 @@
 import type { BriefDoc, ConceptNodeType } from "@grasp/schema";
 import { resolveEvidence, type EvidenceChip } from "./brief";
+import { forceLayout, estimateLabelWidth, type ForceNodeInput } from "./force";
 
 export interface GraphEdgeVM {
   id: string;
@@ -28,11 +29,10 @@ export interface ConceptLayout {
 // Ring placement order for non-idea nodes (problem opposite the mechanisms, etc.).
 const TYPE_ORDER: ConceptNodeType[] = ["problem", "mechanism", "outcome", "feature"];
 
-export function layoutConcept(doc: BriefDoc, width = 640, height = 480): ConceptLayout {
-  const cx = width / 2;
-  const cy = height / 2;
-  const radius = Math.min(width, height) / 2 - 60;
+export const IDEA_RADIUS = 22;
+export const NODE_RADIUS = 14;
 
+export function layoutConcept(doc: BriefDoc, width = 640, height = 480): ConceptLayout {
   const ideaNode = doc.conceptGraph.nodes.find((n) => n.type === "idea")!;
   const others = doc.conceptGraph.nodes
     .filter((n) => n.type !== "idea")
@@ -40,31 +40,25 @@ export function layoutConcept(doc: BriefDoc, width = 640, height = 480): Concept
     .sort((a, b) => TYPE_ORDER.indexOf(a.n.type) - TYPE_ORDER.indexOf(b.n.type) || a.i - b.i)
     .map(({ n }) => n);
 
-  const nodes: ConceptNodeVM[] = [
-    {
-      id: ideaNode.id,
-      type: ideaNode.type,
-      label: ideaNode.label,
-      detail: ideaNode.detail,
-      x: cx,
-      y: cy,
-      evidence: resolveEvidence(doc, ideaNode.evidenceIds),
-    },
-  ];
+  // Idea is the pinned root; everything else settles organically around it.
+  const ordered = [ideaNode, ...others];
+  const forceInputs: ForceNodeInput[] = ordered.map((n) => ({
+    id: n.id,
+    radius: n.type === "idea" ? IDEA_RADIUS : NODE_RADIUS,
+    labelWidth: estimateLabelWidth(n.label),
+    pinned: n.type === "idea",
+  }));
+  const pos = forceLayout(forceInputs, doc.conceptGraph.edges, width, height);
 
-  const count = Math.max(others.length, 1);
-  others.forEach((node, i) => {
-    const angle = -Math.PI / 2 + (i / count) * 2 * Math.PI;
-    nodes.push({
-      id: node.id,
-      type: node.type,
-      label: node.label,
-      detail: node.detail,
-      x: cx + radius * Math.cos(angle),
-      y: cy + radius * Math.sin(angle),
-      evidence: resolveEvidence(doc, node.evidenceIds),
-    });
-  });
+  const nodes: ConceptNodeVM[] = ordered.map((n) => ({
+    id: n.id,
+    type: n.type,
+    label: n.label,
+    detail: n.detail,
+    x: pos.get(n.id)!.x,
+    y: pos.get(n.id)!.y,
+    evidence: resolveEvidence(doc, n.evidenceIds),
+  }));
 
   const edges: GraphEdgeVM[] = doc.conceptGraph.edges.map((e) => ({
     id: e.id,
