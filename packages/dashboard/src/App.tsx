@@ -1,49 +1,126 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { BriefDoc } from "@grasp/schema";
 import { buildCards, buildSignals } from "./adapters/brief";
+import { buildAtlasView } from "./adapters/atlas";
 import { Header } from "./components/Header";
 import { BriefCard } from "./components/BriefCard";
-import { ConceptGraph } from "./components/ConceptGraph";
 import { LandscapeGraph } from "./components/LandscapeGraph";
+import { AtlasGlobe } from "./components/AtlasGlobe";
+import { AtlasOutline } from "./components/AtlasOutline";
+import { AtlasDetail } from "./components/AtlasDetail";
+import { AtlasIntro } from "./components/AtlasIntro";
+import { AltitudeRail } from "./components/AltitudeRail";
+import { HowItWorks } from "./components/HowItWorks";
+import { CameraAltitudesTable } from "./components/CameraAltitudesTable";
 
-type GraphTab = "concept" | "landscape";
+type Tab = "strategic" | "atlas" | "landscape" | "evidence";
+
+const GUARANTEES = [
+  ["Accessible", "Use List view for screen readers and keyboard navigation."],
+  ["Export ready", "The atlas exports as a structured outline + Mermaid flows."],
+  ["Secure by default", "All items and links are escaped; only safe links open."],
+  ["Deterministic layout", "Continents and landmarks are placed reproducibly."],
+  ["Fallback", "If WebGL is unavailable, the outline is shown."],
+] as const;
 
 export function App({ doc }: { doc: BriefDoc }) {
   const signals = buildSignals(doc);
   const cards = buildCards(doc);
-  const [tab, setTab] = useState<GraphTab>("concept");
+  const view = useMemo(() => buildAtlasView(doc), [doc]);
+  const [tab, setTab] = useState<Tab>("atlas");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [listView, setListView] = useState(false);
+
+  const landmark = view.landmarks.find((l) => l.id === selectedId) ?? null;
+  const crumb = useMemo(() => {
+    const parts: string[] = ["Atlas"];
+    const lm = view.landmarks.find((l) => l.id === selectedId);
+    const city = view.cities.find((c) => c.id === selectedId) ?? (lm && view.cities.find((c) => c.id === lm.cityId));
+    const contId = lm?.continentId ?? city?.continentId ?? view.continents.find((c) => c.id === selectedId)?.id;
+    const cont = view.continents.find((c) => c.id === contId);
+    if (cont) parts.push(cont.title, cont.continentName);
+    if (city) parts.push(city.name);
+    if (lm) parts.push(lm.name);
+    return parts;
+  }, [selectedId, view]);
+  const level: 1 | 2 | 3 | 4 = landmark ? 4 : view.cities.some((c) => c.id === selectedId) ? 3 : view.continents.some((c) => c.id === selectedId) ? 2 : 1;
 
   return (
     <main className="app">
       <Header signals={signals} />
-      <section className="cards-grid">
-        {cards.map((card) => (
-          <BriefCard key={card.key} card={card} />
+      <nav className="top-nav" role="tablist">
+        {(["strategic", "atlas", "landscape", "evidence"] as Tab[]).map((t) => (
+          <button key={t} type="button" role="tab" aria-selected={tab === t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
+            {t === "strategic" ? "Strategic" : t === "atlas" ? "Atlas" : t === "landscape" ? "Landscape" : "Evidence"}
+          </button>
         ))}
-      </section>
-      <section className="graphs">
-        <div className="graph-tabs" role="tablist">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "concept"}
-            className={tab === "concept" ? "active" : ""}
-            onClick={() => setTab("concept")}
-          >
-            Concept map
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "landscape"}
-            className={tab === "landscape" ? "active" : ""}
-            onClick={() => setTab("landscape")}
-          >
-            Landscape
-          </button>
-        </div>
-        {tab === "concept" ? <ConceptGraph doc={doc} /> : <LandscapeGraph doc={doc} />}
-      </section>
+      </nav>
+
+      {tab === "strategic" && (
+        <section className="cards-grid">
+          {cards.map((card) => (
+            <BriefCard key={card.key} card={card} />
+          ))}
+        </section>
+      )}
+
+      {tab === "atlas" && (
+        <>
+          <div className="atlas-grid">
+            <AtlasIntro />
+            <div className="atlas-center">
+              <div className="atlas-crumb-row">
+                <span className="atlas-breadcrumb" data-testid="atlas-breadcrumb">{crumb.join(" › ")}</span>
+                <button type="button" className="list-view-toggle" aria-pressed={listView} onClick={() => setListView((v) => !v)}>List view</button>
+              </div>
+              {listView ? (
+                <AtlasOutline view={view} selectedId={selectedId} onSelect={setSelectedId} />
+              ) : (
+                <AtlasGlobe view={view} selectedId={selectedId} onSelect={setSelectedId} />
+              )}
+              <AltitudeRail level={level} />
+            </div>
+            <AtlasDetail landmark={landmark} />
+          </div>
+          <div className="atlas-bottom">
+            <CameraAltitudesTable view={view} onSelect={setSelectedId} />
+            <div className="atlas-listview-panel">
+              <h3>List view (outline)</h3>
+              <AtlasOutline view={view} selectedId={selectedId} onSelect={setSelectedId} />
+            </div>
+          </div>
+          <HowItWorks view={view} />
+        </>
+      )}
+
+      {tab === "landscape" && (
+        <section className="graphs">
+          <LandscapeGraph doc={doc} />
+        </section>
+      )}
+
+      {tab === "evidence" && (
+        <section className="evidence-list" data-testid="evidence-list">
+          <h2>Evidence</h2>
+          <ul>
+            {doc.evidence.map((e) => (
+              <li key={e.id}>
+                <strong>{e.claim}</strong> — {e.source} {e.verified ? "(verified)" : "(inferred)"}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <footer className="atlas-guarantees">
+        {GUARANTEES.map(([t, d]) => (
+          <div key={t} className="guarantee">
+            <span className="guarantee-title">{t}</span>
+            <span className="guarantee-desc">{d}</span>
+          </div>
+        ))}
+        <div className="phase-badges"><span>Phase 1</span><span>Phase 2</span><span>Phase 3</span></div>
+      </footer>
     </main>
   );
 }
