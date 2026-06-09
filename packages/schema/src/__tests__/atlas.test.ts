@@ -72,6 +72,12 @@ describe("atlas schema", () => {
     expect(validateBrief(withAtlas(atlas)).ok).toBe(true);
   });
 
+  it("rejects a whitespace-only title (non-empty after trimming)", () => {
+    const atlas = JSON.parse(JSON.stringify(oneContinent));
+    atlas.continents[0].title = "   ";
+    expect(validateBrief(withAtlas(atlas)).ok).toBe(false);
+  });
+
   it("rejects duplicate flow ids (consistent with other levels)", () => {
     const atlas = JSON.parse(JSON.stringify(oneContinent));
     atlas.continents[0].flows = [

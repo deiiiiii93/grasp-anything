@@ -18,7 +18,7 @@ export type LandscapeEdgeType = (typeof landscapeEdgeTypes)[number];
 
 const Landmark = z.object({
   id: z.string().min(1),
-  name: z.string().min(1),
+  name: z.string().trim().min(1),
   detail: z.string().optional(),
   whyItMatters: z.string().optional(),
   techTag: z.string().optional(),
@@ -27,7 +27,7 @@ const Landmark = z.object({
 });
 const City = z.object({
   id: z.string().min(1),
-  name: z.string().min(1),
+  name: z.string().trim().min(1),
   summary: z.string().optional(),
   evidenceIds: z.array(z.string()).default([]),
   landmarks: z.array(Landmark).default([]),
@@ -43,8 +43,8 @@ const Flow = z.object({
 const Continent = z.object({
   id: z.string().min(1),
   domain: z.enum(atlasDomains),
-  title: z.string().min(1),
-  summary: z.string().min(1),
+  title: z.string().trim().min(1),
+  summary: z.string().trim().min(1),
   evidenceIds: z.array(z.string()).default([]),
   cities: z.array(City).default([]),
   flows: z.array(Flow).default([]),
