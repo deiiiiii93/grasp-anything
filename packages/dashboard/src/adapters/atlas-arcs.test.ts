@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildAtlasView } from "./atlas";
+import { buildAtlasView, selectionContext, visibleAt } from "./atlas";
 import type { BriefDoc } from "@grasp/schema";
 
 // Minimal doc with one flow continent (workflows) holding 2 cities + 1 flow city->city.
@@ -51,5 +51,29 @@ describe("buildAtlasView flow arcs", () => {
     ] as never;
     const v = buildAtlasView(d);
     expect(v.arcs.map((a) => a.id)).toEqual(["f2"]); // f3 dropped (unresolved endpoint)
+  });
+});
+
+describe("selectionContext", () => {
+  const v = buildAtlasView(docWithFlow());
+  it("level 1 (orbit) when nothing selected", () => {
+    expect(selectionContext(v, null)).toMatchObject({ level: 1, continentId: null });
+  });
+  it("level 2 (continent) when a continent is selected", () => {
+    expect(selectionContext(v, "c_wf")).toMatchObject({ level: 2, continentId: "c_wf" });
+  });
+  it("level 3 (city) resolves its continent", () => {
+    expect(selectionContext(v, "city_a")).toMatchObject({ level: 3, continentId: "c_wf", cityId: "city_a" });
+  });
+});
+
+describe("visibleAt", () => {
+  it("cities show from continent altitude; landmarks+arcs from city altitude", () => {
+    expect(visibleAt("city", 1)).toBe(false);
+    expect(visibleAt("city", 2)).toBe(true);
+    expect(visibleAt("landmark", 2)).toBe(false);
+    expect(visibleAt("landmark", 3)).toBe(true);
+    expect(visibleAt("arc", 3)).toBe(true);
+    expect(visibleAt("arc", 2)).toBe(false);
   });
 });

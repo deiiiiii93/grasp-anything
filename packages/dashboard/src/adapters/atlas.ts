@@ -107,3 +107,30 @@ export function buildAtlasView(doc: BriefDoc): AtlasView {
 
   return { continents, cities, landmarks, arcs, outline };
 }
+
+export interface SelectionContext {
+  level: 1 | 2 | 3 | 4;
+  continentId: string | null;
+  cityId: string | null;
+  landmarkId: string | null;
+  lat: number | null; lng: number | null; // camera target (selected node's position)
+}
+
+export function selectionContext(view: AtlasView, selectedId: string | null): SelectionContext {
+  const base = { continentId: null, cityId: null, landmarkId: null, lat: null, lng: null };
+  if (!selectedId) return { level: 1, ...base };
+  const lm = view.landmarks.find((l) => l.id === selectedId);
+  if (lm) return { level: 4, continentId: lm.continentId, cityId: lm.cityId, landmarkId: lm.id, lat: lm.lat, lng: lm.lng };
+  const city = view.cities.find((c) => c.id === selectedId);
+  if (city) return { level: 3, continentId: city.continentId, cityId: city.id, landmarkId: null, lat: city.lat, lng: city.lng };
+  const cont = view.continents.find((c) => c.id === selectedId);
+  if (cont) return { level: 2, continentId: cont.id, cityId: null, landmarkId: null, lat: cont.lat, lng: cont.lng };
+  return { level: 1, ...base };
+}
+
+// Level-of-detail gate. Cities appear at Continent altitude (2+); landmarks and
+// flow arcs at City altitude (3+).
+export function visibleAt(kind: "city" | "landmark" | "arc", level: 1 | 2 | 3 | 4): boolean {
+  if (kind === "city") return level >= 2;
+  return level >= 3; // landmark, arc
+}
