@@ -18,8 +18,10 @@ describe("briefToPrintHtml", () => {
     }
   });
 
-  it("embeds both graphs as inline svg", () => {
-    expect((html.match(/<svg /g) ?? []).length).toBe(2);
+  it("embeds the atlas outline and the landscape svg", () => {
+    expect(html).toContain("How it works");
+    expect(html).toContain("Schema validator");
+    expect((html.match(/<svg /g) ?? []).length).toBe(1);
   });
 
   it("has a print stylesheet and a references section", () => {

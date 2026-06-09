@@ -1,5 +1,6 @@
 import type { BriefDoc } from "@grasp/schema";
-import { conceptToMermaid, landscapeToMermaid } from "./mermaid";
+import { landscapeToMermaid } from "./mermaid";
+import { atlasToMarkdown } from "./atlasToMarkdown";
 import { safeHref } from "./url";
 
 const SECTIONS: { key: "idea" | "problem" | "why" | "how" | "takeaway"; title: string }[] = [
@@ -29,7 +30,7 @@ export function briefToMarkdown(doc: BriefDoc): string {
     out.push(`## ${title}`, `${doc.brief[key]}${markers ? ` ${markers}` : ""}`, "");
   }
 
-  out.push("## Concept map", "", "```mermaid", conceptToMermaid(doc), "```", "");
+  out.push(atlasToMarkdown(doc));
   out.push("## Competitive landscape", "", "```mermaid", landscapeToMermaid(doc), "```", "");
 
   if (cited.length > 0) {

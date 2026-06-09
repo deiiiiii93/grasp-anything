@@ -18,10 +18,11 @@ describe("briefToMarkdown", () => {
     }
   });
 
-  it("renders both graphs as mermaid blocks", () => {
-    expect(md).toContain("## Concept map");
+  it("renders the atlas outline and the competitive landscape mermaid block", () => {
+    expect(md).toContain("## How it works");
+    expect(md).toContain("Schema validator");
     expect(md).toContain("## Competitive landscape");
-    expect((md.match(/```mermaid/g) ?? []).length).toBe(2);
+    expect((md.match(/```mermaid/g) ?? []).length).toBe(1);
   });
 
   it("footnotes cited evidence with a verified/inferred tag", () => {

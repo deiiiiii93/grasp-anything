@@ -4,3 +4,5 @@ export * from "./mermaid";
 export * from "./markdown";
 export * from "./svg";
 export * from "./printHtml";
+export * from "./atlasToMarkdown";
+export * from "./atlasToHtml";

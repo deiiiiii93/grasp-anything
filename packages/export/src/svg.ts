@@ -1,14 +1,5 @@
 import type { BriefDoc } from "@grasp/schema";
-import { layoutConcept, layoutLandscape } from "@grasp/dashboard/adapters";
-
-const CONCEPT_FILL: Record<string, string> = {
-  idea: "#f5c451",
-  problem: "#e5687a",
-  mechanism: "#5aa9f0",
-  outcome: "#5bd1a0",
-  feature: "#b794f6",
-};
-const DEFAULT_FILL = "#9aa3b2";
+import { layoutLandscape } from "@grasp/dashboard/adapters";
 
 function xml(text: string): string {
   return text
@@ -51,18 +42,6 @@ function renderSvg(
   }
   parts.push("</svg>");
   return parts.join("");
-}
-
-export function conceptToSvg(doc: BriefDoc): string {
-  const layout = layoutConcept(doc);
-  const nodes: RenderNode[] = layout.nodes.map((n) => ({
-    id: n.id,
-    x: n.x,
-    y: n.y,
-    label: n.label,
-    fill: CONCEPT_FILL[n.type] ?? DEFAULT_FILL,
-  }));
-  return renderSvg("concept", layout.width, layout.height, nodes, layout.edges);
 }
 
 export function landscapeToSvg(doc: BriefDoc): string {

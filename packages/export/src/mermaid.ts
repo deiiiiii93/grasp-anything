@@ -1,14 +1,6 @@
 import type { BriefDoc } from "@grasp/schema";
 import { safeHref } from "./url";
 
-const CONCEPT_CLASSDEF = [
-  "classDef idea fill:#f5c451,stroke:#caa23c,color:#1a1a1a;",
-  "classDef problem fill:#e5687a,stroke:#c14f60,color:#1a1a1a;",
-  "classDef mechanism fill:#5aa9f0,stroke:#3f86c9,color:#1a1a1a;",
-  "classDef outcome fill:#5bd1a0,stroke:#3fad82,color:#1a1a1a;",
-  "classDef feature fill:#b794f6,stroke:#9670d8,color:#1a1a1a;",
-];
-
 const LANDSCAPE_CLASSDEF = [
   "classDef self fill:#f5c451,stroke:#caa23c,color:#1a1a1a;",
   "classDef alternative fill:#5aa9f0,stroke:#3f86c9,color:#1a1a1a;",
@@ -33,18 +25,6 @@ function label(text: string): string {
 /** Node ids are emitted as bare Mermaid identifiers; untrusted ids are reduced to a safe slug so they can't inject syntax. (Applied consistently to node, edge, and click references.) */
 function nodeId(id: string): string {
   return id.replace(/[^A-Za-z0-9_]/g, "_");
-}
-
-export function conceptToMermaid(doc: BriefDoc): string {
-  const lines = ["flowchart TD"];
-  for (const n of doc.conceptGraph.nodes) {
-    lines.push(`  ${nodeId(n.id)}["${label(n.label)}"]:::${n.type}`);
-  }
-  for (const e of doc.conceptGraph.edges) {
-    lines.push(`  ${nodeId(e.source)} -->|${e.type}| ${nodeId(e.target)}`);
-  }
-  for (const c of CONCEPT_CLASSDEF) lines.push(`  ${c}`);
-  return lines.join("\n");
 }
 
 export function landscapeToMermaid(doc: BriefDoc): string {

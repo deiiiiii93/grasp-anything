@@ -1,5 +1,6 @@
 import type { BriefDoc } from "@grasp/schema";
-import { conceptToSvg, landscapeToSvg } from "./svg";
+import { landscapeToSvg } from "./svg";
+import { atlasToHtml } from "./atlasToHtml";
 import { safeHref } from "./url";
 
 const SECTIONS: { key: "idea" | "problem" | "why" | "how" | "takeaway"; title: string }[] = [
@@ -83,7 +84,7 @@ export function briefToPrintHtml(doc: BriefDoc): string {
 <p class="verdict">${esc(doc.brief.takeaway)}</p>
 <p class="chips">${chips.join(" · ")}</p>
 ${sectionsHtml}
-<section><h2>Concept map</h2>${conceptToSvg(doc)}</section>
+${atlasToHtml(doc)}
 <section><h2>Competitive landscape</h2>${landscapeToSvg(doc)}</section>
 ${refsHtml}
 </body></html>
