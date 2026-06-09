@@ -41,7 +41,7 @@
       {
         "id": "c_mod", "domain": "modules", "title": "Modules",
         "summary": "Analyzer agents, the schema contract, and the dashboard.",
-        "evidenceIds": [],
+        "evidenceIds": ["ev1"],
         "cities": [
           { "id": "city_agents", "name": "Analyzer agents", "evidenceIds": [],
             "landmarks": [
@@ -53,7 +53,7 @@
       {
         "id": "c_flow", "domain": "workflows", "title": "Workflows",
         "summary": "Analyze on demand; re-analyze only changed files on commit.",
-        "evidenceIds": [],
+        "evidenceIds": ["ev1"],
         "cities": [
           { "id": "city_incr", "name": "Incremental updates", "evidenceIds": [],
             "landmarks": [
