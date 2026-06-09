@@ -20,21 +20,48 @@
     },
     "evidence": { "why": ["ev1"] }
   },
-  "conceptGraph": {
-    "nodes": [
-      { "id": "p1", "type": "problem", "label": "Codebases are hard to onboard into", "detail": "Structure is implicit and spread across many files.", "evidenceIds": [] },
-      { "id": "idea1", "type": "idea", "label": "Repo as an interactive knowledge graph", "detail": "Nodes are files/symbols; edges are imports/calls.", "evidenceIds": [] },
-      { "id": "m1", "type": "mechanism", "label": "LLM agents emit a validated JSON graph", "detail": "Batched file analysis by sub-agents.", "evidenceIds": [] },
-      { "id": "m2", "type": "mechanism", "label": "Deterministic core validates and fingerprints", "detail": "Schema validation + change detection.", "evidenceIds": [] },
-      { "id": "o1", "type": "outcome", "label": "Interactive architecture dashboard", "detail": "Layered, zoomable graph view.", "evidenceIds": ["ev1"] },
-      { "id": "f1", "type": "feature", "label": "Incremental graph updates on commit", "detail": "Only changed files are re-analyzed.", "evidenceIds": [] }
-    ],
-    "edges": [
-      { "id": "ce1", "source": "idea1", "target": "p1", "type": "addresses" },
-      { "id": "ce2", "source": "idea1", "target": "m1", "type": "composedOf" },
-      { "id": "ce3", "source": "idea1", "target": "m2", "type": "composedOf" },
-      { "id": "ce4", "source": "m1", "target": "o1", "type": "enables" },
-      { "id": "ce5", "source": "m2", "target": "f1", "type": "produces" }
+  "atlas": {
+    "continents": [
+      {
+        "id": "c_arch", "domain": "architecture", "title": "Architecture",
+        "summary": "A deterministic core with LLM agents at the edges and a React dashboard on top.",
+        "evidenceIds": ["ev1"],
+        "cities": [
+          { "id": "city_core", "name": "Deterministic core", "summary": "Validates and fingerprints the graph.", "evidenceIds": [],
+            "landmarks": [
+              { "id": "lm_validator", "name": "Schema validator", "detail": "A Zod schema is the single contract.", "whyItMatters": "Keeps agent output trustworthy.", "techTag": "Zod", "tags": ["determinism"], "evidenceIds": [] }
+            ] },
+          { "id": "city_dash", "name": "Dashboard", "summary": "Renders the graph for humans.", "evidenceIds": [],
+            "landmarks": [
+              { "id": "lm_react", "name": "React dashboard", "detail": "An interactive web view of the graph.", "whyItMatters": "Lowers onboarding effort to near zero.", "techTag": "React", "tags": ["ux"], "evidenceIds": ["ev1"] }
+            ] }
+        ],
+        "flows": []
+      },
+      {
+        "id": "c_mod", "domain": "modules", "title": "Modules",
+        "summary": "Analyzer agents, the schema contract, and the dashboard.",
+        "evidenceIds": ["ev1"],
+        "cities": [
+          { "id": "city_agents", "name": "Analyzer agents", "evidenceIds": [],
+            "landmarks": [
+              { "id": "lm_batch", "name": "Batch file analyzer", "detail": "Reads files in batches and emits JSON.", "techTag": "LLM", "tags": [], "evidenceIds": [] }
+            ] }
+        ],
+        "flows": []
+      },
+      {
+        "id": "c_flow", "domain": "workflows", "title": "Workflows",
+        "summary": "Analyze on demand; re-analyze only changed files on commit.",
+        "evidenceIds": ["ev1"],
+        "cities": [
+          { "id": "city_incr", "name": "Incremental updates", "evidenceIds": [],
+            "landmarks": [
+              { "id": "lm_fingerprint", "name": "Fingerprint diff", "detail": "Only changed files are re-analyzed.", "whyItMatters": "Keeps re-runs cheap.", "techTag": "sha256", "tags": [], "evidenceIds": [] }
+            ] }
+        ],
+        "flows": []
+      }
     ]
   },
   "landscapeGraph": {

@@ -128,10 +128,13 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 /* ─── Atlas grid (3 columns: intro | center | detail) ─────────────── */
 .atlas-grid {
   display: grid;
-  grid-template-columns: 260px 1fr 280px;
+  grid-template-columns: 240px minmax(0, 1fr) 300px;
   gap: 20px;
   align-items: start;
   margin-bottom: 28px;
+}
+@media (max-width: 900px) {
+  .atlas-grid { grid-template-columns: 1fr; }
 }
 
 /* ─── Atlas center column ─────────────────────────────────────────── */
@@ -152,6 +155,9 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 }
 .list-view-toggle[aria-pressed="true"] { color: var(--text); border-color: var(--accent); }
 .list-view-toggle:hover { color: var(--text); }
+
+/* ─── Atlas globe ─────────────────────────────────────────────────── */
+.atlas-globe { width: 100%; overflow: hidden; border-radius: 10px; background: #0c0e12; }
 
 /* ─── Atlas globe fallback / outline ─────────────────────────────── */
 .atlas-globe-fallback { padding: 8px 0; }
