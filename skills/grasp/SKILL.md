@@ -6,7 +6,7 @@ description: Use when the user wants to understand a repository strategically (n
 # `/grasp` — Strategic Repo Understanding
 
 Turn any repository into a **strategic brief**: five answers (idea, problem, why
-it wins, how, similar repos) backed by two interactive graphs (concept map +
+it wins, how, similar repos) backed by two interactive graphs (product atlas +
 competitive landscape). You orchestrate three analyzer agents, assemble their
 output into a validated `repo-brief.json`, and render the vendored dashboard.
 
@@ -65,7 +65,7 @@ stale** (on a first run, all of them). A fresh stream keeps its existing
 `.grasp/fragments/*.json` untouched. Each agent returns **only** a JSON
 fragment; write each to `<target>/.grasp/fragments/`:
 
-- **essence-analyzer** → `essence.json` (concept graph + idea/problem/how)
+- **essence-analyzer** → `essence.json` (**atlas** continents/cities/landmarks + idea/problem/how)
 - **success-analyzer** → `success.json` (why + takeaway + evidence)
 - **landscape-analyzer** → `landscape.json` (landscape graph) — **skip when
   `broadness: offline`**; the assembler then synthesizes a self-only landscape.
