@@ -274,6 +274,42 @@ deterministic outline/list view. The **Evidence** tab aggregates all evidence ch
 The globe module is **lazy-loaded** so the Strategic/Landscape/Evidence tabs don't
 pay for WebGL.
 
+### 5.1 Canonical UI (mockup)
+
+The build targets the approved mockup **`docs/superpowers/specs/2026-06-09-grasp-atlas-ui.png`**.
+Element inventory the implementation must match:
+
+- **Top nav:** `Strategic · Atlas · Landscape · Evidence`; right side = breadcrumb
+  (`Atlas › Asia › Orchestration › SQLite checkpointer`) + **"List View"** toggle.
+- **Left rail (Atlas intro):** `/grasp` wordmark → "Product Atlas" → tagline
+  *"How it works — explore from Orbit to Landmark"* → one-paragraph blurb →
+  **"SIX DOMAINS · SIX CONTINENTS"** list; each row = colored dot · *Domain →
+  Continent* · the domain's **guiding question** · the **landmark motif** name.
+  Footer row: *"Antarctica (optional) — Uncharted / low confidence (Phase 2+)"*.
+- **Center (globe):** tinted continents + landmark sprites; an **ORBIT** badge
+  (*"Whole product · Six dimensions"*) top-left; a bottom **altitude rail** = a
+  4-step stepper — **① Orbit** (Whole product) · **② Continent** (Explore one) ·
+  **③ City** (Landmarks & flows) · **④ Landmark** (Details & evidence).
+- **Right (detail panel), adapts per altitude:** kind tag (`LANDMARK`) → name +
+  `techTag` → **WHY IT MATTERS** (`whyItMatters`) → **EVIDENCE** (each: claim /
+  source with file ref + external-link icon, link via `safeHref`) → **RELATED
+  FLOWS** chips (`source → target`, flow `type`). At Continent/City the panel
+  shows the `summary` + that level's evidence.
+- **Bottom band — two columns:**
+  - Left **"CAMERA ALTITUDES (WHAT YOU SEE)"**: a six-row table — dot · *Domain
+    (Continent)* · guiding question · `N cities · M landmarks` · expand; **"Open
+    all"**. Footnote: *"the atlas is also available as an outline in the export
+    (Markdown/HTML) with Mermaid flow diagrams."*
+  - Right **"LIST VIEW (OUTLINE)"**: tabs `Outline · Search`; the accessible
+    nested tree (continent → city → landmark) with the selected node highlighted;
+    a mini detail card mirroring the right panel.
+- **Footer guarantees row:** *Accessible · Export ready · Secure by default ·
+  Deterministic layout · Fallback*, each with a one-line caption; **Phase 1/2/3**
+  badges at the right.
+
+The mockup is the source of truth for layout/copy; this spec is the source of
+truth for data/behavior. Where they differ, raise it rather than guessing.
+
 ---
 
 ## 6. Analyzer + pipeline
