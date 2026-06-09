@@ -1,29 +1,55 @@
 import { z } from "zod";
 
-export const conceptNodeTypes = ["problem", "idea", "mechanism", "outcome", "feature"] as const;
-export const conceptEdgeTypes = ["addresses", "composedOf", "enables", "produces"] as const;
 export const landscapeNodeTypes = ["self", "alternative", "category"] as const;
 export const landscapeEdgeTypes = ["competesWith", "sharesApproach", "alternativeTo"] as const;
 
-export type ConceptNodeType = (typeof conceptNodeTypes)[number];
-export type ConceptEdgeType = (typeof conceptEdgeTypes)[number];
+export const atlasDomains = [
+  "architecture", "modules", "workflows",
+  "businessFlows", "techSelection", "uiUxTaste",
+] as const;
+export const flowEdgeTypes = [
+  "calls", "streams", "persists", "fansOut", "reviews", "next",
+] as const;
+export type AtlasDomain = (typeof atlasDomains)[number];
+export type FlowEdgeType = (typeof flowEdgeTypes)[number];
+
 export type LandscapeNodeType = (typeof landscapeNodeTypes)[number];
 export type LandscapeEdgeType = (typeof landscapeEdgeTypes)[number];
 
-const ConceptNode = z.object({
+const Landmark = z.object({
   id: z.string().min(1),
-  type: z.enum(conceptNodeTypes),
-  label: z.string().min(1),
-  detail: z.string().default(""),
+  name: z.string().min(1),
+  detail: z.string().optional(),
+  whyItMatters: z.string().optional(),
+  techTag: z.string().optional(),
+  tags: z.array(z.string()).default([]),
   evidenceIds: z.array(z.string()).default([]),
 });
-
-const ConceptEdge = z.object({
+const City = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  summary: z.string().optional(),
+  evidenceIds: z.array(z.string()).default([]),
+  landmarks: z.array(Landmark).default([]),
+});
+const Flow = z.object({
   id: z.string().min(1),
   source: z.string().min(1),
   target: z.string().min(1),
-  type: z.enum(conceptEdgeTypes),
+  type: z.enum(flowEdgeTypes),
+  label: z.string().optional(),
+  evidenceIds: z.array(z.string()).default([]),
 });
+const Continent = z.object({
+  id: z.string().min(1),
+  domain: z.enum(atlasDomains),
+  title: z.string().min(1),
+  summary: z.string().min(1),
+  evidenceIds: z.array(z.string()).default([]),
+  cities: z.array(City).default([]),
+  flows: z.array(Flow).default([]),
+});
+const Atlas = z.object({ continents: z.array(Continent).default([]) });
 
 const LandscapeNode = z.object({
   id: z.string().min(1),
@@ -99,20 +125,11 @@ export const BriefDocSchema = z
   .object({
     meta: Meta,
     brief: Brief,
-    conceptGraph: z.object({ nodes: z.array(ConceptNode), edges: z.array(ConceptEdge) }),
+    atlas: Atlas,
     landscapeGraph: z.object({ nodes: z.array(LandscapeNode), edges: z.array(LandscapeEdge) }),
     evidence: z.array(Evidence),
   })
   .superRefine((doc, ctx) => {
-    const ideaCount = doc.conceptGraph.nodes.filter((n) => n.type === "idea").length;
-    if (ideaCount !== 1) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `conceptGraph must have exactly one 'idea' node, found ${ideaCount}`,
-        path: ["conceptGraph", "nodes"],
-      });
-    }
-
     const selfCount = doc.landscapeGraph.nodes.filter((n) => n.type === "self").length;
     if (selfCount !== 1) {
       ctx.addIssue({
@@ -121,16 +138,6 @@ export const BriefDocSchema = z
         path: ["landscapeGraph", "nodes"],
       });
     }
-
-    const conceptIds = new Set(doc.conceptGraph.nodes.map((n) => n.id));
-    doc.conceptGraph.edges.forEach((e, i) => {
-      if (!conceptIds.has(e.source)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `concept edge '${e.id}' source '${e.source}' not found`, path: ["conceptGraph", "edges", i, "source"] });
-      }
-      if (!conceptIds.has(e.target)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `concept edge '${e.id}' target '${e.target}' not found`, path: ["conceptGraph", "edges", i, "target"] });
-      }
-    });
 
     const landIds = new Set(doc.landscapeGraph.nodes.map((n) => n.id));
     doc.landscapeGraph.edges.forEach((e, i) => {
@@ -150,7 +157,6 @@ export const BriefDocSchema = z
         }
       });
     };
-    doc.conceptGraph.nodes.forEach((n, i) => checkEvidence(n.evidenceIds, ["conceptGraph", "nodes", i, "evidenceIds"]));
     doc.landscapeGraph.nodes.forEach((n, i) => checkEvidence(n.evidenceIds, ["landscapeGraph", "nodes", i, "evidenceIds"]));
 
     if (doc.brief.evidence) {
@@ -170,15 +176,55 @@ export const BriefDocSchema = z
         ctx.addIssue({ code: z.ZodIssueCode.custom, message: `category node '${n.id}' requires a label`, path: ["landscapeGraph", "nodes", i] });
       }
     });
+
+    // --- Atlas referential integrity ---
+    const seenIds = new Set<string>();
+    const seenDomains = new Set<string>();
+    const dupId = (id: string, path: (string | number)[]) => {
+      if (seenIds.has(id)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `duplicate id '${id}'`, path });
+      }
+      seenIds.add(id);
+    };
+    doc.atlas.continents.forEach((cont, ci) => {
+      dupId(cont.id, ["atlas", "continents", ci, "id"]);
+      if (seenDomains.has(cont.domain)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `continent domain '${cont.domain}' must be unique`, path: ["atlas", "continents", ci, "domain"] });
+      }
+      seenDomains.add(cont.domain);
+      checkEvidence(cont.evidenceIds, ["atlas", "continents", ci, "evidenceIds"]);
+      const localIds = new Set<string>();
+      cont.cities.forEach((city, cyi) => {
+        dupId(city.id, ["atlas", "continents", ci, "cities", cyi, "id"]);
+        localIds.add(city.id);
+        checkEvidence(city.evidenceIds, ["atlas", "continents", ci, "cities", cyi, "evidenceIds"]);
+        city.landmarks.forEach((lm, li) => {
+          dupId(lm.id, ["atlas", "continents", ci, "cities", cyi, "landmarks", li, "id"]);
+          localIds.add(lm.id);
+          checkEvidence(lm.evidenceIds, ["atlas", "continents", ci, "cities", cyi, "landmarks", li, "evidenceIds"]);
+        });
+      });
+      cont.flows.forEach((fl, fi) => {
+        dupId(fl.id, ["atlas", "continents", ci, "flows", fi, "id"]);
+        checkEvidence(fl.evidenceIds, ["atlas", "continents", ci, "flows", fi, "evidenceIds"]);
+        for (const [end, key] of [[fl.source, "source"], [fl.target, "target"]] as const) {
+          if (!localIds.has(end))
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: `flow '${fl.id}' ${key} '${end}' not a city/landmark in this continent`, path: ["atlas", "continents", ci, "flows", fi, key] });
+        }
+      });
+    });
   });
 
 export type BriefDoc = z.infer<typeof BriefDocSchema>;
 
 export {
-  ConceptNode as ConceptNodeSchema,
-  ConceptEdge as ConceptEdgeSchema,
   LandscapeNode as LandscapeNodeSchema,
   LandscapeEdge as LandscapeEdgeSchema,
   Evidence as EvidenceSchema,
   Meta as MetaSchema,
+  Landmark as LandmarkSchema,
+  City as CitySchema,
+  Flow as FlowSchema,
+  Continent as ContinentSchema,
+  Atlas as AtlasSchema,
 };
