@@ -10,7 +10,7 @@ export function AtlasGlobe({
 }: {
   view: AtlasView;
   selectedId: string | null;
-  onSelect: (id: string) => void;
+  onSelect: (id: string | null) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   // Size the globe to its grid track so the canvas never overflows into the
@@ -39,7 +39,9 @@ export function AtlasGlobe({
   }
   return (
     <div className="atlas-globe" data-testid="atlas-globe" ref={containerRef}>
-      <GlobeImpl view={view} onSelect={onSelect} width={size.w} height={size.h} />
+      <GlobeImpl view={view} selectedId={selectedId} onSelect={onSelect} width={size.w} height={size.h} />
     </div>
   );
 }
+
+export default AtlasGlobe;
