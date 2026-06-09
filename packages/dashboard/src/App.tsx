@@ -1,17 +1,18 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import type { BriefDoc } from "@grasp/schema";
 import { buildCards, buildSignals } from "./adapters/brief";
 import { buildAtlasView, selectionContext } from "./adapters/atlas";
 import { Header } from "./components/Header";
 import { BriefCard } from "./components/BriefCard";
 import { LandscapeGraph } from "./components/LandscapeGraph";
-import { AtlasGlobe } from "./components/AtlasGlobe";
 import { AtlasOutline } from "./components/AtlasOutline";
 import { AtlasDetail, type DetailNode } from "./components/AtlasDetail";
 import { AtlasIntro } from "./components/AtlasIntro";
 import { AltitudeRail } from "./components/AltitudeRail";
 import { HowItWorks } from "./components/HowItWorks";
 import { CameraAltitudesTable } from "./components/CameraAltitudesTable";
+
+const AtlasGlobe = lazy(() => import("./components/AtlasGlobe"));
 
 type Tab = "strategic" | "atlas" | "landscape" | "evidence";
 
@@ -88,7 +89,9 @@ export function App({ doc }: { doc: BriefDoc }) {
               {listView ? (
                 <AtlasOutline view={view} selectedId={selectedId} onSelect={setSelectedId} />
               ) : (
-                <AtlasGlobe view={view} selectedId={selectedId} onSelect={setSelectedId} />
+                <Suspense fallback={<div className="atlas-globe" data-testid="atlas-globe-loading">Loading globe…</div>}>
+                  <AtlasGlobe view={view} selectedId={selectedId} onSelect={setSelectedId} />
+                </Suspense>
               )}
               <AltitudeRail level={level} onAscend={ascendTo} />
             </div>
