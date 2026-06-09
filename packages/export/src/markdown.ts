@@ -1,5 +1,5 @@
 import type { BriefDoc } from "@grasp/schema";
-import { landscapeToMermaid } from "./mermaid";
+import { landscapeToMermaid, atlasToMermaid } from "./mermaid";
 import { atlasToMarkdown } from "./atlasToMarkdown";
 import { safeHref } from "./url";
 
@@ -31,6 +31,9 @@ export function briefToMarkdown(doc: BriefDoc): string {
   }
 
   out.push(atlasToMarkdown(doc));
+  for (const f of atlasToMermaid(doc)) {
+    out.push(`### Flows — ${f.continentTitle}`, "", "```mermaid", f.diagram, "```", "");
+  }
   out.push("## Competitive landscape", "", "```mermaid", landscapeToMermaid(doc), "```", "");
 
   if (cited.length > 0) {

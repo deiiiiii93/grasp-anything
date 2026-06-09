@@ -20,6 +20,18 @@ export function atlasToHtml(doc: BriefDoc): string {
       }
       parts.push(`</ul>`);
     }
+    if (c.flows.length) {
+      const nameById = new Map<string, string>();
+      for (const city of c.cities) { nameById.set(city.id, city.name); for (const lm of city.landmarks) nameById.set(lm.id, lm.name); }
+      parts.push(`<ol class="flows">`);
+      for (const fl of c.flows) {
+        const s = esc(nameById.get(fl.source) ?? fl.source);
+        const t = esc(nameById.get(fl.target) ?? fl.target);
+        const lbl = esc(fl.label ?? fl.type);
+        parts.push(`<li>${s} <span class="flow-type">${lbl}</span> → ${t}</li>`);
+      }
+      parts.push(`</ol>`);
+    }
     parts.push(`</article>`);
   }
   parts.push(`</section>`);

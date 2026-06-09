@@ -27,6 +27,36 @@ function nodeId(id: string): string {
   return id.replace(/[^A-Za-z0-9_]/g, "_");
 }
 
+export interface AtlasFlowDiagram { continentTitle: string; diagram: string; }
+
+/** One Mermaid flowchart per continent that has flows. Node labels = the referenced
+ *  city/landmark names (escaped); edges = `source -->|type| target` with optional label. */
+export function atlasToMermaid(doc: BriefDoc): AtlasFlowDiagram[] {
+  const out: AtlasFlowDiagram[] = [];
+  for (const c of doc.atlas.continents) {
+    if (c.flows.length === 0) continue;
+    const nameById = new Map<string, string>();
+    for (const city of c.cities) {
+      nameById.set(city.id, city.name);
+      for (const lm of city.landmarks) nameById.set(lm.id, lm.name);
+    }
+    const lines = ["flowchart LR"];
+    const seen = new Set<string>();
+    const emitNode = (id: string) => {
+      if (seen.has(id)) return;
+      seen.add(id);
+      lines.push(`  ${nodeId(id)}["${label(nameById.get(id) ?? id)}"]`);
+    };
+    for (const fl of c.flows) { emitNode(fl.source); emitNode(fl.target); }
+    for (const fl of c.flows) {
+      const lbl = fl.label ? ` ${label(fl.label)} ` : ` ${fl.type} `;
+      lines.push(`  ${nodeId(fl.source)} -->|${lbl.trim()}| ${nodeId(fl.target)}`);
+    }
+    out.push({ continentTitle: c.title, diagram: lines.join("\n") });
+  }
+  return out;
+}
+
 export function landscapeToMermaid(doc: BriefDoc): string {
   const lines = ["flowchart LR"];
   for (const n of doc.landscapeGraph.nodes) {
