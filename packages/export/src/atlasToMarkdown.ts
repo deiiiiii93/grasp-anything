@@ -1,7 +1,7 @@
 import type { BriefDoc } from "@grasp/schema";
 
 // Escape the chars that break Markdown link/emphasis syntax in body text.
-function mdText(s: string): string {
+export function mdText(s: string): string {
   return s.replace(/([\\`*_[\]()])/g, "\\$1");
 }
 

@@ -51,4 +51,15 @@ describe("export XSS hardening", () => {
     expect(md).toContain("src\\]injected"); // the "]" in the link text is escaped
   });
 
+  it("Markdown escapes an untrusted continent title in the Flows heading", () => {
+    const d = JSON.parse(JSON.stringify(sample));
+    const c = d.atlas.continents[0]; // has two cities → can hold a flow
+    c.title = "Evil*[x](javascript:alert(1))";
+    c.flows = [{ id: "f_poison", source: c.cities[0].id, target: c.cities[1].id, type: "next" }];
+    const md = briefToMarkdown(validateBrief(d).data!);
+    expect(md).toContain("### Flows —"); // a flow continent emits the heading
+    expect(md).not.toContain("[x](javascript:"); // not a live markdown link
+    expect(md).toContain("\\[x\\]"); // brackets escaped via mdText
+  });
+
 });
