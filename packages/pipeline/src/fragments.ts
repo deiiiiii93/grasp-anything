@@ -1,7 +1,6 @@
 import { z } from "zod";
 import {
-  ConceptNodeSchema,
-  ConceptEdgeSchema,
+  AtlasSchema,
   LandscapeNodeSchema,
   LandscapeEdgeSchema,
   EvidenceSchema,
@@ -18,10 +17,7 @@ export const EssenceFragmentSchema = z.object({
   idea: z.string().min(1),
   problem: z.string().min(1),
   how: z.string().min(1),
-  conceptGraph: z.object({
-    nodes: z.array(ConceptNodeSchema),
-    edges: z.array(ConceptEdgeSchema),
-  }),
+  atlas: AtlasSchema,
   evidence: z.array(EvidenceSchema).default([]),
   briefEvidence: z
     .object({

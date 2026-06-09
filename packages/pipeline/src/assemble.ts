@@ -114,7 +114,7 @@ export function assemble(input: AssembleInput): AssembleResult {
       },
       ...(briefEvidence ? { evidence: briefEvidence } : {}),
     },
-    conceptGraph: essence.conceptGraph,
+    atlas: essence.atlas,
     landscapeGraph: landscape ? landscape.landscapeGraph : synthesizeSelfLandscape(meta),
     evidence: [...evidenceById.values()],
   };

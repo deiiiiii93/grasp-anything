@@ -9,12 +9,19 @@ const validEssence = {
   idea: "Turn a repo into a knowledge graph.",
   problem: "Onboarding into a codebase is slow.",
   how: "LLM agents emit a validated JSON graph.",
-  conceptGraph: {
-    nodes: [
-      { id: "idea1", type: "idea", label: "Repo as a graph" },
-      { id: "p1", type: "problem", label: "Hard to onboard" },
-    ],
-    edges: [{ id: "ce1", source: "idea1", target: "p1", type: "addresses" }],
+  atlas: {
+    continents: [
+      {
+        id: "c_arch", domain: "architecture", title: "Architecture",
+        summary: "A deterministic core with agents at the edges.",
+        evidenceIds: [],
+        cities: [
+          { id: "city_core", name: "Core", evidenceIds: [],
+            landmarks: [ { id: "lm_validator", name: "Validator", detail: "Zod is the contract.", evidenceIds: [] } ] }
+        ],
+        flows: []
+      }
+    ]
   },
 };
 
@@ -23,8 +30,8 @@ describe("EssenceFragmentSchema", () => {
     const parsed = EssenceFragmentSchema.parse(validEssence);
     expect(parsed.evidence).toEqual([]);
     expect(parsed.briefEvidence).toEqual({});
-    expect(parsed.conceptGraph.nodes[0].detail).toBe("");
-    expect(parsed.conceptGraph.nodes[0].evidenceIds).toEqual([]);
+    expect(parsed.atlas.continents.length).toBeGreaterThan(0);
+    expect(parsed.atlas.continents[0].id).toBe("c_arch");
   });
 
   it("rejects a fragment missing the 'how' prose", () => {
