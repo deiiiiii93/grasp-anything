@@ -25,6 +25,11 @@ This **replaces** `conceptGraph`. The **landscape graph keeps** the 2D
 `ForceGraph` renderer built previously. The strategic prose cards (idea / problem
 / why / takeaway) are unchanged.
 
+**Positioning:** the Atlas is a **product-teardown map — from product-level
+understanding down to implementation-level evidence.** The globe is playful, but
+the contract stays serious: a deterministic hierarchy of product reasoning,
+evidence, and exportable explanation. (Geography is a skin; the data is the point.)
+
 ### Decisions locked during brainstorming
 - The graph is a **true 3D globe** (WebGL via `react-globe.gl`/three.js), **not**
   2D. The user explicitly accepted the consequences ("nothing is indispensable").
@@ -32,7 +37,16 @@ This **replaces** `conceptGraph`. The **landscape graph keeps** the 2D
   included), and they double as the textual "How it works" dimensions.
 - Use **real continents and real landmark motifs** for playfulness.
 - Four altitudes: **Orbit → Continent → City → Landmark**.
-- Build is **phased** (see §10).
+- Build is **phased** — now **three** phases (places → flows → analyzer quality, §10).
+- A single pure adapter **`buildAtlasView(doc): AtlasView`** is the spine; WebGL is
+  isolated behind it (§5).
+- `Landmark` carries **`whyItMatters`** + **`tags`**; `validateBrief` gains a
+  **warning tier** beside hard errors (§4).
+- Dashboard is a **three-zone layout** with top nav *Strategic | Atlas | Landscape
+  | Evidence* (§5).
+
+*(This spec was revised on 2026-06-09 from the user's implementation-ready review —
+those refinements are folded into §4, §5, §7, §9, §10.)*
 
 ### Consequences we accept (direct results of choosing 3D)
 1. **No globe in the static export.** WebGL cannot serialize to SVG, so the
@@ -109,8 +123,10 @@ export const flowEdgeTypes = [
 interface Landmark {
   id: string;            // unique within the brief
   name: string;          // e.g. "SQLite checkpointer"
-  detail?: string;       // one-to-three sentences
+  detail?: string;       // WHAT it is — one-to-three sentences
+  whyItMatters?: string; // WHY this choice matters (the PM takeaway)
   techTag?: string;      // e.g. "LangGraph", "FastAPI"
+  tags?: string[];       // free labels, e.g. ["determinism", "HITL"]
   evidenceIds: string[];
 }
 interface City {
@@ -126,6 +142,7 @@ interface Flow {         // only meaningful for flow continents
   target: string;
   type: (typeof flowEdgeTypes)[number];
   label?: string;
+  evidenceIds?: string[];
 }
 interface Continent {
   id: string;
@@ -141,13 +158,27 @@ interface Atlas {
 }
 ```
 
-**Validation (`validateBrief` superRefine), additive to today's rules:**
-- Every `evidenceIds` entry (continent/city/landmark) resolves to an `evidence[]` id.
+**Hard errors (`validateBrief` superRefine — fail the brief), additive to today's rules:**
+- `atlas.continents` is present.
+- Every `evidenceIds` entry (continent/city/landmark/flow) resolves to an `evidence[]` id.
 - `domain` is unique across `continents`.
 - All ids (continent/city/landmark) are globally unique within the brief.
 - Each `Flow.source`/`target` resolves to a city **or** landmark id **inside the
   same continent**.
-- `name`/`title`/`summary` are non-empty where present.
+- `title`/`name`/`summary` are non-empty after trimming where present.
+- Phase 1 allows empty `flows`; **sparse continents are valid** (a continent may
+  have zero cities).
+
+**Warnings (do not fail — surfaced to the orchestrator/user):** `validateBrief`'s
+return type gains `warnings: string[]` alongside `errors`/`data`. Warning checks:
+- a continent has a `summary` but **no evidence**;
+- a landmark has **no `detail`**;
+- a city has **zero landmarks**;
+- the atlas has **fewer than three populated continents** (thin teardown);
+- landmark count exceeds a **performance cap** (globe gets crowded).
+
+These let a brief render while telling the orchestrator where the analysis is thin
+(it can re-dispatch the analyzer for those continents).
 
 **Why a hierarchy, not a flat graph:** the four altitudes are literally the three
 nesting levels (continent → city → landmark) plus the orbit overview. The renderer
@@ -189,19 +220,59 @@ checkpointer`), an **"↩ Orbit"** reset, and a **"List view"** toggle (the outl
 **Graceful fallback:** if WebGL is unavailable, render the **outline/list view**
 instead of the globe (same data, §7).
 
+**The spine — one pure adapter (`adapters/atlas.ts`):**
+
+```ts
+buildAtlasView(doc: BriefDoc): AtlasView
+interface AtlasView {
+  continents: AtlasContinentView[]; // domain, title, summary, tint, lat/lng, motif
+  cities: AtlasCityView[];          // deterministic lat/lng within continent polygon
+  landmarks: AtlasLandmarkView[];   // deterministic lat/lng; detail/why/tech/tags/evidence
+  arcs: AtlasArcView[];             // great-circle endpoints for flows (Phase 2)
+  outline: AtlasOutlineNode[];      // the nested text tree (export + a11y + How-it-works)
+}
+```
+
+`buildAtlasView` is **pure and deterministic** (same `doc` → identical lat/lng and
+outline). It performs the **domain → geography** mapping (§3 table) and the seeded
+in-polygon placement, so **WebGL is fully isolated from business logic** — every
+component and the export consume `AtlasView`, never the globe library. This is the
+single most important testable seam.
+
 **Components**
-- `adapters/atlas.ts` — pure: `buildAtlasView(doc)` → `{ continents, cities,
-  landmarks, arcs }` with deterministic lat/lng; plus `atlasOutline(doc)` (the
-  nested text structure shared with export + a11y).
-- `components/AtlasGlobe.tsx` — the `react-globe.gl` wrapper + camera/LOD/breadcrumb.
-- `components/AtlasOutline.tsx` — the accessible nested list (buttons → detail panel).
-- `components/HowItWorks.tsx` — the **text** teardown: each continent's `title` +
-  `summary` + its cities/landmarks as bullets, with evidence chips.
-- `ConceptGraph.tsx` is **removed**; the graph tab becomes **Atlas**. `LandscapeGraph`
-  + `ForceGraph` stay.
+- `adapters/atlas.ts` — `buildAtlasView` (above). No React, no three.js.
+- `components/AtlasGlobe.tsx` — the `react-globe.gl` wrapper; consumes `AtlasView`;
+  owns camera/LOD/breadcrumb. The only file that imports the globe library.
+- `components/AtlasOutline.tsx` — the accessible nested list from `outline` (buttons
+  → detail panel); also the WebGL-absent fallback and the "List view".
+- `components/HowItWorks.tsx` — the **text** teardown from `outline`: each
+  continent's `title` + `summary` + cities/landmarks as bullets, with evidence chips.
+- `components/AtlasDetail.tsx` — the right-hand detail panel: `name`, `detail`,
+  **`whyItMatters`**, `techTag`, `tags`, related flows, evidence chips.
+- `ConceptGraph.tsx` is **removed**; `LandscapeGraph` + `ForceGraph` stay.
+
+**Dashboard layout — three zones + top nav:**
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ Top nav:  Strategic │ Atlas │ Landscape │ Evidence            │
+├───────────────┬───────────────────────────────┬──────────────┤
+│ Atlas intro   │ 3D globe                       │ Detail panel │
+│ six domains   │ altitude rail                  │ why/tech/tags│
+│ legend        │ camera / LOD controls          │ evidence/flow│
+├───────────────┴───────────────────────────────┴──────────────┤
+│ Bottom: How-it-works text  +  accessible outline / list view  │
+└──────────────────────────────────────────────────────────────┘
+```
+
+Left rail explains the six continents (legend); center is the globe (altitude rail
++ LOD controls); right is the selected-landmark detail; the bottom band carries the
+deterministic outline/list view. The **Evidence** tab aggregates all evidence chips.
 
 **New deps:** `react-globe.gl`, `three`, `@types/three`, and a world GeoJSON asset
 (small, public-domain, e.g. world-atlas 110m), bundled for the self-contained dist.
+The globe module is **lazy-loaded** so the Strategic/Landscape/Evidence tabs don't
+pay for WebGL.
 
 ---
 
@@ -231,17 +302,18 @@ outline + Mermaid }.
 ## 7. Export (`@grasp/export`)
 
 The globe is dashboard-only. The export replaces `conceptToSvg`/`conceptToMermaid`
-with **atlas renderers**:
+with three **atlas renderers**, all fed by `buildAtlasView(doc).outline` (imported
+from `@grasp/dashboard/adapters`) so the export and the dashboard list view never
+drift:
 
-- **Markdown** (`report.md`): a nested outline —
-  `## How it works` → per continent `### {title}` + summary → cities as `####` →
-  landmarks as bullets (`- **name** (techTag) — detail [^evid]`) — **plus** a
-  ```mermaid``` flow diagram per flow continent (Workflows/Business Flows).
-- **Print HTML** (`report.html`): the same outline as semantic HTML sections;
-  flows as inline static SVG or Mermaid-equivalent. No WebGL.
-- The shared `atlasOutline(doc)` (from `@grasp/dashboard/adapters`) is the single
-  source for the dashboard list view **and** the export, keeping them in sync.
-- Landscape export (`landscapeToSvg`/`landscapeToMermaid`) is **unchanged**.
+- **`atlasToMarkdown.ts`** → `report.md`: a nested outline — `## How it works` →
+  per continent `### {title}` + summary → cities as `####` → landmarks as bullets
+  (`- **name** (techTag) — detail [^evid]`), with `whyItMatters` as a sub-line.
+- **`atlasToHtml.ts`** → `report.html`: the same outline as semantic HTML sections.
+- **`atlasToMermaid.ts`** → a ```mermaid``` flow diagram per flow continent
+  (Workflows / Business Flows) — Phase 2; escaped labels + slugged node ids.
+- No WebGL assumptions anywhere in export. Landscape export
+  (`landscapeToSvg`/`landscapeToMermaid`) is **unchanged**.
 
 ---
 
@@ -261,38 +333,49 @@ The shared `safeHref` (`@grasp/export/src/url.ts`) remains the URL guard.
 
 ## 9. Testing strategy
 
-- **Schema** (`@grasp/schema`): atlas validation — evidence resolution, unique
-  domains/ids, flow endpoints resolve within-continent; golden `sample-brief.json`
-  updated to the atlas shape and round-trips.
+- **Schema** (`@grasp/schema`): valid atlas passes; duplicate domains fail;
+  duplicate ids fail; unresolved evidence fails; cross-continent flow endpoint
+  fails; **sparse continent passes**; warning checks fire without failing. Golden
+  `sample-brief.json` updated to the atlas shape and round-trips.
 - **Adapter** (`@grasp/dashboard`): `buildAtlasView` is **deterministic** (same
-  doc → identical lat/lng), points fall within their continent polygon,
-  `atlasOutline` reflects the hierarchy.
-- **Globe component:** smoke tests with `react-globe.gl` **mocked** (WebGL is
-  absent in jsdom) — renders, a click invokes the select handler, breadcrumb
-  updates. `AtlasOutline` tested fully (buttons, keyboard, detail panel).
-- **Export** (`@grasp/export`): atlas → Markdown outline + Mermaid structure tests;
-  escaping/XSS tests for hostile names/urls.
-- **A11y:** the outline renders landmarks as focusable buttons with labels.
+  doc → identical lat/lng); each point lands **inside its assigned continent
+  polygon or the deterministic fallback ring**; `outline` matches the hierarchy;
+  a landmark maps to the detail-panel model (`detail`/`whyItMatters`/`tags`).
+- **Globe component:** `react-globe.gl` **mocked** (no WebGL in jsdom) — renders
+  the **fallback when WebGL is unavailable**; click continent updates breadcrumb;
+  click city reveals landmarks; click landmark opens the detail panel; "List view"
+  toggle works. `AtlasOutline` tested fully (buttons, keyboard navigation).
+- **Export** (`@grasp/export`): `atlasToMarkdown`/`atlasToHtml` outline structure;
+  `atlasToMermaid` structure; hostile-text + Mermaid escaping; **no WebGL
+  assumptions** anywhere in export.
 
 ---
 
 ## 10. Phasing
 
-**Phase 1 — the navigable globe of places (all six continents, no flows)**
-- `@grasp/schema`: the `atlas` model + validation; golden sample.
-- Analyzer + `assemble`: emit/merge `atlas` (replacing `conceptGraph`).
-- `react-globe.gl` `AtlasGlobe` with real continents, city/landmark points,
+**Phase 1 — places, text, fallback (all six continents, no flows)**
+- `@grasp/schema`: the `atlas` model + validation (errors **and** warnings); golden sample.
+- Analyzer (`essence-analyzer`) + `assemble`: emit/merge `atlas` (replacing `conceptGraph`).
+- `adapters/atlas.ts` `buildAtlasView` (the pure spine) → `AtlasView` incl. `outline`.
+- `AtlasGlobe` (`react-globe.gl`) with real continents, city/landmark points,
   camera-altitude LOD (Orbit→Continent→City→Landmark), detail panel, breadcrumb,
   WebGL-absent fallback.
-- `atlasOutline` + `AtlasOutline` list view (a11y) + `HowItWorks` text section.
-- `@grasp/export`: atlas **outline** in `report.md`/`report.html` (no flows yet).
+- `AtlasOutline` list view (a11y) + `HowItWorks` text section + three-zone layout.
+- `@grasp/export`: `atlasToMarkdown` / `atlasToHtml` (outline only, no flows yet).
 - Landscape + strategic cards untouched.
 
 **Phase 2 — flows, art, polish**
 - Great-circle **flow arcs** for Workflows/Business Flows + cross-continent arcs.
 - Curated landmark **sprites/art**, idle auto-rotate, smoother camera easing.
-- **Mermaid flow** diagrams in the export; optional Antarctica "uncharted".
+- **`atlasToMermaid`** flow diagrams in the export; optional Antarctica "uncharted".
 - Performance pass (point/arc counts, GeoJSON size).
+
+**Phase 3 — analyzer quality**
+- A dedicated **`atlas-analyzer`** agent **if** the `essence-analyzer` prompt gets
+  too crowded (fragment contract unchanged).
+- Per-finding **confidence scoring**; richer **technical-selection** reasoning
+  (`whyItMatters` depth); concrete **UI/UX-taste** examples.
+- **Evidence-density checks** wired to the warning tier (§4).
 
 Each phase is independently shippable and merges to `main` on its own (per the
 project's per-plan cadence).
