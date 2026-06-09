@@ -1,7 +1,8 @@
 import type { BriefDoc, LandscapeNodeType } from "@grasp/schema";
 import { resolveEvidence, type EvidenceChip } from "./brief";
-import type { GraphEdgeVM } from "./concept";
 import { forceLayout, estimateLabelWidth, type ForceNodeInput } from "./force";
+
+export interface GraphEdgeVM { id: string; source: string; target: string; type: string; }
 
 export interface LandscapeNodeVM {
   id: string;

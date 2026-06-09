@@ -1,3 +1,3 @@
 export * from "./brief";
-export * from "./concept";
+export * from "./atlas";
 export * from "./landscape";
