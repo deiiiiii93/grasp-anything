@@ -51,6 +51,12 @@ export function App({ doc }: { doc: BriefDoc }) {
   }, [selectedId, view]);
   const level = ctx.level;
 
+  const ascendTo = (n: 1 | 2 | 3 | 4) => {
+    if (n <= 1) return setSelectedId(null);
+    if (n === 2) return setSelectedId(ctx.continentId);
+    if (n === 3) return setSelectedId(ctx.cityId ?? ctx.continentId);
+  };
+
   return (
     <main className="app">
       <Header signals={signals} />
@@ -84,7 +90,7 @@ export function App({ doc }: { doc: BriefDoc }) {
               ) : (
                 <AtlasGlobe view={view} selectedId={selectedId} onSelect={setSelectedId} />
               )}
-              <AltitudeRail level={level} />
+              <AltitudeRail level={level} onAscend={ascendTo} />
             </div>
             <AtlasDetail node={detailNode} />
           </div>

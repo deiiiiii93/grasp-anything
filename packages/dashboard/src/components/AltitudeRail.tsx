@@ -5,16 +5,24 @@ const STEPS = [
   { n: 4, label: "Landmark", caption: "Details & evidence" },
 ] as const;
 
-export function AltitudeRail({ level }: { level: 1 | 2 | 3 | 4 }) {
+export function AltitudeRail({ level, onAscend }: { level: 1 | 2 | 3 | 4; onAscend?: (n: 1 | 2 | 3 | 4) => void }) {
   return (
     <ol className="altitude-rail" data-testid="altitude-rail">
-      {STEPS.map((s) => (
-        <li key={s.n} className={s.n === level ? "active" : ""} aria-current={s.n === level ? "step" : undefined}>
+      {STEPS.map((s) => {
+        const canAscend = onAscend && s.n < level;
+        const inner = (<>
           <span className="rail-n">{s.n}</span>
           <span className="rail-label">{s.label}</span>
           <span className="rail-caption">{s.caption}</span>
-        </li>
-      ))}
+        </>);
+        return (
+          <li key={s.n} className={s.n === level ? "active" : ""} aria-current={s.n === level ? "step" : undefined}>
+            {canAscend
+              ? <button type="button" className="rail-step-btn" onClick={() => onAscend!(s.n as 1 | 2 | 3 | 4)}>{inner}</button>
+              : inner}
+          </li>
+        );
+      })}
     </ol>
   );
 }

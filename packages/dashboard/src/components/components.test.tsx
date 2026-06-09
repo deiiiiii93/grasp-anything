@@ -1,7 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { vi } from "vitest";
 import { EvidenceChips } from "./EvidenceChips";
 import { BriefCard } from "./BriefCard";
 import { Header } from "./Header";
+import { AltitudeRail } from "./AltitudeRail";
 import type { BriefCardVM, EvidenceChip, SignalsVM } from "../adapters/brief";
 
 const chips: EvidenceChip[] = [
@@ -65,5 +67,14 @@ describe("Header", () => {
     render(<Header signals={{ ...signals, url: undefined }} />);
     expect(screen.queryByRole("link")).toBeNull();
     expect(screen.getByText("owner/repo")).toBeInTheDocument();
+  });
+});
+
+describe("AltitudeRail", () => {
+  it("ascends to a lower level when an earlier step is clicked", () => {
+    const onAscend = vi.fn();
+    render(<AltitudeRail level={4} onAscend={onAscend} />);
+    fireEvent.click(screen.getByRole("button", { name: /Continent/ }));
+    expect(onAscend).toHaveBeenCalledWith(2);
   });
 });
