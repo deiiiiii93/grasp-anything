@@ -8,11 +8,12 @@ import { sampleDoc } from "../test-utils/sample";
 function Harness() {
   const view = buildAtlasView(sampleDoc);
   const [sel, setSel] = useState<string | null>(null);
-  const landmark = view.landmarks.find((l) => l.id === sel) ?? null;
+  const lm = view.landmarks.find((l) => l.id === sel) ?? null;
+  const node = lm ? ({ kind: "landmark" as const, landmark: lm }) : null;
   return (
     <div>
       <AtlasOutline view={view} selectedId={sel} onSelect={setSel} />
-      <AtlasDetail landmark={landmark} />
+      <AtlasDetail node={node} />
     </div>
   );
 }

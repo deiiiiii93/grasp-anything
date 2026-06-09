@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
 import type { BriefDoc } from "@grasp/schema";
 import { buildCards, buildSignals } from "./adapters/brief";
-import { buildAtlasView } from "./adapters/atlas";
+import { buildAtlasView, selectionContext } from "./adapters/atlas";
 import { Header } from "./components/Header";
 import { BriefCard } from "./components/BriefCard";
 import { LandscapeGraph } from "./components/LandscapeGraph";
 import { AtlasGlobe } from "./components/AtlasGlobe";
 import { AtlasOutline } from "./components/AtlasOutline";
-import { AtlasDetail } from "./components/AtlasDetail";
+import { AtlasDetail, type DetailNode } from "./components/AtlasDetail";
 import { AtlasIntro } from "./components/AtlasIntro";
 import { AltitudeRail } from "./components/AltitudeRail";
 import { HowItWorks } from "./components/HowItWorks";
@@ -31,7 +31,13 @@ export function App({ doc }: { doc: BriefDoc }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [listView, setListView] = useState(false);
 
-  const landmark = view.landmarks.find((l) => l.id === selectedId) ?? null;
+  const ctx = useMemo(() => selectionContext(view, selectedId), [view, selectedId]);
+  const detailNode: DetailNode = useMemo(() => {
+    if (ctx.landmarkId) { const l = view.landmarks.find((x) => x.id === ctx.landmarkId); return l ? { kind: "landmark", landmark: l } : null; }
+    if (ctx.cityId) { const c = view.cities.find((x) => x.id === ctx.cityId); return c ? { kind: "city", city: c } : null; }
+    if (ctx.continentId) { const c = view.continents.find((x) => x.id === ctx.continentId); return c ? { kind: "continent", continent: c } : null; }
+    return null;
+  }, [ctx, view]);
   const crumb = useMemo(() => {
     const parts: string[] = ["Atlas"];
     const lm = view.landmarks.find((l) => l.id === selectedId);
@@ -43,7 +49,7 @@ export function App({ doc }: { doc: BriefDoc }) {
     if (lm) parts.push(lm.name);
     return parts;
   }, [selectedId, view]);
-  const level: 1 | 2 | 3 | 4 = landmark ? 4 : view.cities.some((c) => c.id === selectedId) ? 3 : view.continents.some((c) => c.id === selectedId) ? 2 : 1;
+  const level = ctx.level;
 
   return (
     <main className="app">
@@ -80,7 +86,7 @@ export function App({ doc }: { doc: BriefDoc }) {
               )}
               <AltitudeRail level={level} />
             </div>
-            <AtlasDetail landmark={landmark} />
+            <AtlasDetail node={detailNode} />
           </div>
           <div className="atlas-bottom">
             <CameraAltitudesTable view={view} onSelect={setSelectedId} />
