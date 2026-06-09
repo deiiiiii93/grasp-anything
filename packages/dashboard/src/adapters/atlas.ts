@@ -1,4 +1,4 @@
-import type { BriefDoc, AtlasDomain } from "@grasp/schema";
+import type { BriefDoc, AtlasDomain, FlowEdgeType } from "@grasp/schema";
 import { resolveEvidence, type EvidenceChip } from "./brief";
 
 // Domain → real-world geography. The data stays geography-agnostic; this fixed
@@ -26,7 +26,15 @@ export interface LandmarkView {
   detail?: string; whyItMatters?: string; techTag?: string; tags: string[];
   lat: number; lng: number; color: string; evidence: EvidenceChip[];
 }
-export interface ArcView { id: string; startLat: number; startLng: number; endLat: number; endLng: number; label?: string; }
+export interface ArcView {
+  id: string;
+  continentId: string;
+  type: FlowEdgeType;
+  startLat: number; startLng: number;
+  endLat: number; endLng: number;
+  color: string;
+  label?: string;
+}
 export interface OutlineNode {
   id: string; kind: "continent" | "city" | "landmark"; title: string;
   children: OutlineNode[];
@@ -56,6 +64,7 @@ export function buildAtlasView(doc: BriefDoc): AtlasView {
   const continents: ContinentView[] = [];
   const cities: CityView[] = [];
   const landmarks: LandmarkView[] = [];
+  const arcs: ArcView[] = [];
   const outline: OutlineNode[] = [];
 
   for (const cont of doc.atlas.continents) {
@@ -77,9 +86,24 @@ export function buildAtlasView(doc: BriefDoc): AtlasView {
       contOutline.children.push(cityOutline);
     });
 
+    // Resolve this continent's flows into great-circle arcs. Endpoints are city or
+    // landmark ids within THIS continent (guaranteed by validateBrief; skip if missing).
+    const posById = new Map<string, { lat: number; lng: number }>();
+    for (const c of cities) if (c.continentId === cont.id) posById.set(c.id, { lat: c.lat, lng: c.lng });
+    for (const l of landmarks) if (l.continentId === cont.id) posById.set(l.id, { lat: l.lat, lng: l.lng });
+    for (const fl of cont.flows) {
+      const s = posById.get(fl.source);
+      const t = posById.get(fl.target);
+      if (!s || !t) continue;
+      arcs.push({
+        id: fl.id, continentId: cont.id, type: fl.type, label: fl.label,
+        startLat: s.lat, startLng: s.lng, endLat: t.lat, endLng: t.lng, color: geo.color,
+      });
+    }
+
     continents.push({ id: cont.id, domain: cont.domain, title: cont.title, summary: cont.summary, continentName: geo.continentName, motif: geo.motif, lat: geo.lat, lng: geo.lng, color: geo.color, cityCount: cont.cities.length, landmarkCount, evidence: resolveEvidence(doc, cont.evidenceIds) });
     outline.push(contOutline);
   }
 
-  return { continents, cities, landmarks, arcs: [], outline };
+  return { continents, cities, landmarks, arcs, outline };
 }
