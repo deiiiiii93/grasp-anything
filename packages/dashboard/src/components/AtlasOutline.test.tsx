@@ -31,7 +31,7 @@ describe("AtlasOutline", () => {
     fireEvent.click(screen.getByTestId("outline-node-lm_validator"));
     const detail = screen.getByTestId("atlas-detail");
     expect(within(detail).getByRole("heading")).toHaveTextContent("Schema validator");
-    expect(within(detail).getByText(/trustworthy/)).toBeInTheDocument();
+    expect(within(detail).getByText(/untrusted agent output/)).toBeInTheDocument();
     expect(within(detail).getByText("Zod")).toBeInTheDocument();
   });
 

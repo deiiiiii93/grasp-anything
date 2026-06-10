@@ -30,7 +30,10 @@ describe("assemble", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.doc.brief.evidence).toEqual({ why: ["ev1"] });
-    expect(result.doc.evidence.map((e) => e.id)).toEqual(["ev1", "ev2"]);
+    // Essence-introduced evidence first (fragment merge order), landscape's ev2 last.
+    expect(result.doc.evidence.map((e) => e.id)).toEqual([
+      "ev1", "ev4", "ev5", "ev6", "ev7", "ev8", "ev9", "ev10", "ev11", "ev12", "ev13", "ev14", "ev2",
+    ]);
   });
 
   it("synthesizes a self-only landscape when offline (no landscape fragment)", () => {

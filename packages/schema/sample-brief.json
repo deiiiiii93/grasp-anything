@@ -5,7 +5,11 @@
     "analyzedAt": "2026-06-08T12:00:00Z",
     "depth": "skim",
     "broadness": "web",
-    "signals": { "stars": 1200, "lastCommit": "2026-06-01", "language": "TypeScript" }
+    "signals": {
+      "stars": 1200,
+      "lastCommit": "2026-06-01",
+      "language": "TypeScript"
+    }
   },
   "brief": {
     "idea": "Turn any codebase into an interactive knowledge graph so newcomers can grasp its architecture without reading every file.",
@@ -18,47 +22,575 @@
       "success": "2026-06-08T12:00:00Z",
       "landscape": "2026-06-08T12:00:00Z"
     },
-    "evidence": { "why": ["ev1"] }
+    "evidence": {
+      "why": [
+        "ev1"
+      ]
+    }
   },
   "atlas": {
     "continents": [
       {
-        "id": "c_arch", "domain": "architecture", "title": "Architecture",
-        "summary": "A deterministic core with LLM agents at the edges and a React dashboard on top.",
-        "evidenceIds": ["ev1"],
+        "id": "c_arch",
+        "domain": "architecture",
+        "title": "Architecture",
+        "summary": "Every brick knows its place: LLM agents produce judgment at the edges, a deterministic core validates everything they say, and a React dashboard renders the result. Nothing crosses a layer except one JSON contract.",
+        "evidenceIds": [
+          "ev13",
+          "ev4"
+        ],
         "cities": [
-          { "id": "city_core", "name": "Deterministic core", "summary": "Validates and fingerprints the graph.", "evidenceIds": [],
+          {
+            "id": "city_core",
+            "name": "Deterministic core",
+            "summary": "The trust boundary: validates, fingerprints, and assembles agent output.",
+            "evidenceIds": [
+              "ev13"
+            ],
             "landmarks": [
-              { "id": "lm_validator", "name": "Schema validator", "detail": "A Zod schema is the single contract.", "whyItMatters": "Keeps agent output trustworthy.", "techTag": "Zod", "tags": ["determinism"], "evidenceIds": [] }
-            ] },
-          { "id": "city_dash", "name": "Dashboard", "summary": "Renders the graph for humans.", "evidenceIds": [],
+              {
+                "id": "lm_validator",
+                "name": "Schema validator",
+                "detail": "A Zod schema is the single contract; superRefine adds cross-reference rules and a non-fatal warning tier.",
+                "whyItMatters": "Keeps untrusted agent output from ever reaching the UI unchecked.",
+                "techTag": "Zod",
+                "tags": [
+                  "determinism",
+                  "contract"
+                ],
+                "evidenceIds": [
+                  "ev13"
+                ]
+              },
+              {
+                "id": "lm_assemble",
+                "name": "Assembler CLI",
+                "detail": "Merges agent fragments into repo-brief.json and exits 0/1/2 so the orchestrator can react mechanically.",
+                "whyItMatters": "Turns fuzzy LLM output into a build step with a pass/fail signal.",
+                "techTag": "Node CLI",
+                "tags": [
+                  "determinism"
+                ],
+                "evidenceIds": [
+                  "ev4"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "city_dash",
+            "name": "Dashboard",
+            "summary": "Renders the brief for humans — globe, outline, and prose share one view model.",
+            "evidenceIds": [
+              "ev5"
+            ],
             "landmarks": [
-              { "id": "lm_react", "name": "React dashboard", "detail": "An interactive web view of the graph.", "whyItMatters": "Lowers onboarding effort to near zero.", "techTag": "React", "tags": ["ux"], "evidenceIds": ["ev1"] }
-            ] }
+              {
+                "id": "lm_react",
+                "name": "React dashboard",
+                "detail": "An interactive web view of the brief: strategic cards, the 3D atlas, and the competitive landscape.",
+                "whyItMatters": "Lowers onboarding effort to near zero.",
+                "techTag": "React",
+                "tags": [
+                  "ux"
+                ],
+                "evidenceIds": [
+                  "ev1"
+                ]
+              },
+              {
+                "id": "lm_adapter",
+                "name": "Pure view adapters",
+                "detail": "buildAtlasView turns the brief into deterministic lat/lng and an outline; WebGL never touches business logic.",
+                "whyItMatters": "The one seam that makes a 3D toy testable like a library.",
+                "techTag": "TypeScript",
+                "tags": [
+                  "determinism",
+                  "testability"
+                ],
+                "evidenceIds": [
+                  "ev5"
+                ]
+              }
+            ]
+          }
         ],
         "flows": []
       },
       {
-        "id": "c_mod", "domain": "modules", "title": "Modules",
-        "summary": "Analyzer agents, the schema contract, and the dashboard.",
-        "evidenceIds": ["ev1"],
+        "id": "c_mod",
+        "domain": "modules",
+        "title": "Modules",
+        "summary": "Four workspace packages and three agents, each a prefabricated piece with one job: schema, pipeline, dashboard, export — bolted together only through repo-brief.json.",
+        "evidenceIds": [
+          "ev6"
+        ],
         "cities": [
-          { "id": "city_agents", "name": "Analyzer agents", "evidenceIds": [],
+          {
+            "id": "city_packages",
+            "name": "Workspace packages",
+            "summary": "npm workspaces with single responsibilities and explicit exports.",
+            "evidenceIds": [
+              "ev13"
+            ],
             "landmarks": [
-              { "id": "lm_batch", "name": "Batch file analyzer", "detail": "Reads files in batches and emits JSON.", "techTag": "LLM", "tags": [], "evidenceIds": [] }
-            ] }
+              {
+                "id": "lm_schema_pkg",
+                "name": "@grasp/schema",
+                "detail": "Owns the BriefDoc contract, validation errors, and the warning tier.",
+                "whyItMatters": "Every other package imports the contract instead of guessing shapes.",
+                "techTag": "Zod",
+                "tags": [
+                  "contract"
+                ],
+                "evidenceIds": [
+                  "ev13"
+                ]
+              },
+              {
+                "id": "lm_export_pkg",
+                "name": "@grasp/export",
+                "detail": "Renders the brief to Markdown and a print-ready HTML page, escaping everything untrusted.",
+                "whyItMatters": "Makes the analysis shareable beyond the dashboard.",
+                "techTag": "Node CLI",
+                "tags": [
+                  "export",
+                  "security"
+                ],
+                "evidenceIds": [
+                  "ev9"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "city_agents",
+            "name": "Analyzer agents",
+            "summary": "Markdown-prompted sub-agents that return only JSON fragments.",
+            "evidenceIds": [
+              "ev6"
+            ],
+            "landmarks": [
+              {
+                "id": "lm_essence",
+                "name": "Essence analyzer",
+                "detail": "Reads README, docs, and core files to emit idea/problem/how plus the six-continent atlas.",
+                "whyItMatters": "The single richest fragment — the whole 'how it works' story flows from here.",
+                "techTag": "LLM",
+                "tags": [
+                  "agents"
+                ],
+                "evidenceIds": [
+                  "ev6"
+                ]
+              },
+              {
+                "id": "lm_landscape",
+                "name": "Landscape analyzer",
+                "detail": "Searches for alternatives and emits the competitive landscape graph.",
+                "whyItMatters": "Separates market judgment from product mechanics so neither pollutes the other.",
+                "techTag": "LLM",
+                "tags": [
+                  "agents"
+                ],
+                "evidenceIds": [
+                  "ev6"
+                ]
+              }
+            ]
+          }
         ],
         "flows": []
       },
       {
-        "id": "c_flow", "domain": "workflows", "title": "Workflows",
-        "summary": "Analyze on demand; re-analyze only changed files on commit.",
-        "evidenceIds": ["ev1"],
+        "id": "c_wf",
+        "domain": "workflows",
+        "title": "Workflows",
+        "summary": "Design once, assemble anywhere: a wizard sets depth, agents fan out in parallel, the assembler validates, and fingerprints make every later run incremental.",
+        "evidenceIds": [
+          "ev11",
+          "ev7"
+        ],
         "cities": [
-          { "id": "city_incr", "name": "Incremental updates", "evidenceIds": [],
+          {
+            "id": "city_analyze",
+            "name": "Analysis run",
+            "summary": "From bare /grasp to an open dashboard in four phases.",
+            "evidenceIds": [
+              "ev11"
+            ],
             "landmarks": [
-              { "id": "lm_fingerprint", "name": "Fingerprint diff", "detail": "Only changed files are re-analyzed.", "whyItMatters": "Keeps re-runs cheap.", "techTag": "sha256", "tags": [], "evidenceIds": [] }
-            ] }
+              {
+                "id": "lm_wizard",
+                "name": "Depth wizard",
+                "detail": "Two axes — depth (docs/skim/deep) and broadness (offline/web) — gate how much code the agents read.",
+                "whyItMatters": "Lets one tool serve a two-minute skim and a deep teardown.",
+                "techTag": "AskUserQuestion",
+                "tags": [
+                  "onboarding"
+                ],
+                "evidenceIds": [
+                  "ev11"
+                ]
+              },
+              {
+                "id": "lm_dispatch",
+                "name": "Parallel dispatch",
+                "detail": "Essence, success, and landscape agents run concurrently and never share state.",
+                "whyItMatters": "Keeps wall-clock time flat as analysis streams are added.",
+                "techTag": "sub-agents",
+                "tags": [
+                  "performance"
+                ],
+                "evidenceIds": [
+                  "ev11"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "city_incr",
+            "name": "Incremental updates",
+            "summary": "Only stale streams are recomputed on a re-run.",
+            "evidenceIds": [
+              "ev7"
+            ],
+            "landmarks": [
+              {
+                "id": "lm_fingerprint",
+                "name": "Fingerprint diff",
+                "detail": "sha256 fingerprints per stream decide what is stale; only changed streams re-dispatch.",
+                "whyItMatters": "Keeps re-runs cheap enough to run on every commit.",
+                "techTag": "sha256",
+                "tags": [
+                  "incremental"
+                ],
+                "evidenceIds": [
+                  "ev7"
+                ]
+              },
+              {
+                "id": "lm_hook",
+                "name": "Post-commit hook",
+                "detail": "An opt-in git hook flags stale streams after each commit and reminds you to re-run.",
+                "whyItMatters": "The brief stays honest as the code drifts.",
+                "techTag": "git",
+                "tags": [
+                  "incremental"
+                ],
+                "evidenceIds": [
+                  "ev8"
+                ]
+              }
+            ]
+          }
+        ],
+        "flows": [
+          {
+            "id": "f_wf1",
+            "source": "lm_wizard",
+            "target": "lm_dispatch",
+            "type": "next",
+            "label": "configure then dispatch",
+            "evidenceIds": []
+          },
+          {
+            "id": "f_wf2",
+            "source": "lm_dispatch",
+            "target": "city_incr",
+            "type": "persists",
+            "label": "fragments + fingerprints",
+            "evidenceIds": []
+          },
+          {
+            "id": "f_wf3",
+            "source": "lm_fingerprint",
+            "target": "city_analyze",
+            "type": "next",
+            "label": "stale streams re-run",
+            "evidenceIds": []
+          }
+        ]
+      },
+      {
+        "id": "c_biz",
+        "domain": "businessFlows",
+        "title": "Business Flows",
+        "summary": "The value pyramid: a newcomer asks one question, explores the answer from orbit to landmark, then ships the brief to teammates as a report — understanding flows downhill from a single command.",
+        "evidenceIds": [
+          "ev1",
+          "ev9"
+        ],
+        "cities": [
+          {
+            "id": "city_onboard",
+            "name": "Newcomer onboarding",
+            "summary": "One command turns an unfamiliar repo into a guided answer.",
+            "evidenceIds": [
+              "ev1"
+            ],
+            "landmarks": [
+              {
+                "id": "lm_brief",
+                "name": "Strategic brief",
+                "detail": "Five answers — idea, problem, why it wins, how, takeaway — each backed by evidence chips.",
+                "whyItMatters": "A PM gets the 'so what' before any code is opened.",
+                "techTag": "dashboard",
+                "tags": [
+                  "onboarding"
+                ],
+                "evidenceIds": [
+                  "ev1"
+                ]
+              },
+              {
+                "id": "lm_globe_tour",
+                "name": "Atlas exploration",
+                "detail": "The reader descends Orbit → Continent → City → Landmark, detail emerging per altitude.",
+                "whyItMatters": "Curiosity does the onboarding; nobody assigns reading.",
+                "techTag": "WebGL",
+                "tags": [
+                  "ux"
+                ],
+                "evidenceIds": [
+                  "ev12"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "city_share",
+            "name": "Sharing & export",
+            "summary": "The brief leaves the dashboard as paste-ready artifacts.",
+            "evidenceIds": [
+              "ev9"
+            ],
+            "landmarks": [
+              {
+                "id": "lm_report",
+                "name": "Markdown report",
+                "detail": "report.md renders the atlas as an outline and the landscape as Mermaid — paste-ready for a README or PR.",
+                "whyItMatters": "The analysis travels to where the team already reads.",
+                "techTag": "Markdown",
+                "tags": [
+                  "export"
+                ],
+                "evidenceIds": [
+                  "ev9"
+                ]
+              },
+              {
+                "id": "lm_pdf",
+                "name": "Print-to-PDF page",
+                "detail": "report.html is a self-contained print page; headless Chrome turns it into a PDF.",
+                "whyItMatters": "Stakeholders without a terminal still get the full story.",
+                "techTag": "HTML",
+                "tags": [
+                  "export"
+                ],
+                "evidenceIds": [
+                  "ev10"
+                ]
+              }
+            ]
+          }
+        ],
+        "flows": [
+          {
+            "id": "f_biz1",
+            "source": "lm_brief",
+            "target": "lm_globe_tour",
+            "type": "next",
+            "label": "read then explore",
+            "evidenceIds": []
+          },
+          {
+            "id": "f_biz2",
+            "source": "city_onboard",
+            "target": "city_share",
+            "type": "next",
+            "label": "understand then share",
+            "evidenceIds": []
+          },
+          {
+            "id": "f_biz3",
+            "source": "lm_report",
+            "target": "lm_pdf",
+            "type": "next",
+            "label": "md to print page",
+            "evidenceIds": []
+          }
+        ]
+      },
+      {
+        "id": "c_tech",
+        "domain": "techSelection",
+        "title": "Technical Selection",
+        "summary": "Stones cut to fit this mountain: Zod because the contract is the architecture, JSON fragments because agents must stay isolated, WebGL because the map is the message, a static dist because briefs must open anywhere.",
+        "evidenceIds": [
+          "ev13",
+          "ev12"
+        ],
+        "cities": [
+          {
+            "id": "city_contract",
+            "name": "Contract-first stack",
+            "summary": "Choices that keep LLM output trustworthy.",
+            "evidenceIds": [
+              "ev13"
+            ],
+            "landmarks": [
+              {
+                "id": "lm_zod",
+                "name": "Zod over JSON Schema",
+                "detail": "Runtime validation and TypeScript types from one source, with superRefine for cross-reference rules.",
+                "whyItMatters": "One definition serves compile time, runtime, and the docs.",
+                "techTag": "Zod",
+                "tags": [
+                  "contract"
+                ],
+                "evidenceIds": [
+                  "ev13"
+                ]
+              },
+              {
+                "id": "lm_fragments",
+                "name": "Fragments over shared memory",
+                "detail": "Agents exchange nothing but JSON files on disk; the assembler is the only merger.",
+                "whyItMatters": "Any agent can be re-run or replaced without touching the others.",
+                "techTag": "JSON",
+                "tags": [
+                  "agents",
+                  "determinism"
+                ],
+                "evidenceIds": [
+                  "ev6"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "city_render",
+            "name": "Rendering stack",
+            "summary": "Choices that make the output feel like a product.",
+            "evidenceIds": [
+              "ev12"
+            ],
+            "landmarks": [
+              {
+                "id": "lm_webgl",
+                "name": "WebGL globe over 2D SVG",
+                "detail": "react-globe.gl gives camera flights and real continents; the cost is no globe in static export, accepted explicitly.",
+                "whyItMatters": "The altitude metaphor only lands when you can actually fly.",
+                "techTag": "three.js",
+                "tags": [
+                  "ux",
+                  "tradeoff"
+                ],
+                "evidenceIds": [
+                  "ev12"
+                ]
+              },
+              {
+                "id": "lm_static",
+                "name": "Static dist over dev server",
+                "detail": "The dashboard ships as a self-contained folder that fetches one JSON file — no server, no build.",
+                "whyItMatters": "A brief is a file you can email, not a deployment.",
+                "techTag": "Vite",
+                "tags": [
+                  "distribution"
+                ],
+                "evidenceIds": [
+                  "ev4"
+                ]
+              }
+            ]
+          }
+        ],
+        "flows": []
+      },
+      {
+        "id": "c_ux",
+        "domain": "uiUxTaste",
+        "title": "UI/UX Taste",
+        "summary": "Beauty as productivity: a playful travel metaphor carries a serious evidence discipline — every claim wears its source, and every pretty surface has an accessible twin.",
+        "evidenceIds": [
+          "ev12",
+          "ev14"
+        ],
+        "cities": [
+          {
+            "id": "city_metaphor",
+            "name": "The travel metaphor",
+            "summary": "Geography as information architecture.",
+            "evidenceIds": [
+              "ev12"
+            ],
+            "landmarks": [
+              {
+                "id": "lm_altitude",
+                "name": "Altitude ladder",
+                "detail": "Four camera altitudes — Orbit, Continent, City, Landmark — are literally the data's nesting levels.",
+                "whyItMatters": "Zooming is understanding; the camera teaches the hierarchy.",
+                "techTag": "camera LOD",
+                "tags": [
+                  "ux"
+                ],
+                "evidenceIds": [
+                  "ev12"
+                ]
+              },
+              {
+                "id": "lm_motifs",
+                "name": "Landmark motifs",
+                "detail": "Six real monuments — Great Wall to Opera House — each chosen as a concept for its domain.",
+                "whyItMatters": "A memorable image per domain makes the teardown stick.",
+                "techTag": "sprites",
+                "tags": [
+                  "story"
+                ],
+                "evidenceIds": [
+                  "ev12"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "city_trust",
+            "name": "Trustworthy by default",
+            "summary": "The fun never outranks the evidence.",
+            "evidenceIds": [
+              "ev14"
+            ],
+            "landmarks": [
+              {
+                "id": "lm_evidence_chips",
+                "name": "Evidence chips",
+                "detail": "Every claim in every panel links to a source chip — file reference or URL, verified or inferred.",
+                "whyItMatters": "Readers can always ask 'says who?' and get an answer.",
+                "techTag": "dashboard",
+                "tags": [
+                  "trust"
+                ],
+                "evidenceIds": [
+                  "ev14"
+                ]
+              },
+              {
+                "id": "lm_fallback",
+                "name": "Outline fallback",
+                "detail": "Without WebGL the same data renders as an accessible nested outline; the list view doubles for screen readers.",
+                "whyItMatters": "The 3D flourish never gates the content.",
+                "techTag": "a11y",
+                "tags": [
+                  "accessibility"
+                ],
+                "evidenceIds": [
+                  "ev14"
+                ]
+              }
+            ]
+          }
         ],
         "flows": []
       }
@@ -66,19 +598,149 @@
   },
   "landscapeGraph": {
     "nodes": [
-      { "id": "self1", "type": "self", "name": "Understand-Anything", "url": "https://github.com/Lum1104/Understand-Anything", "stars": 1200, "category": "cat1", "evidenceIds": [] },
-      { "id": "alt1", "type": "alternative", "name": "Sourcegraph Cody", "url": "https://github.com/sourcegraph/cody", "stars": 3000, "oneLiner": "AI coding assistant with codebase context.", "similarity": 0.55, "differentiator": "Commercial, IDE-embedded, not a static graph.", "category": "cat1", "evidenceIds": ["ev2"] },
-      { "id": "alt2", "type": "alternative", "name": "CodeSee", "url": "https://github.com/Codesee-io", "stars": 800, "oneLiner": "Visual maps of a codebase.", "similarity": 0.7, "differentiator": "Hosted SaaS; less LLM-driven narrative.", "category": "cat1", "evidenceIds": [] },
-      { "id": "cat1", "type": "category", "label": "Code comprehension tools", "evidenceIds": [] }
+      {
+        "id": "self1",
+        "type": "self",
+        "name": "Understand-Anything",
+        "url": "https://github.com/Lum1104/Understand-Anything",
+        "stars": 1200,
+        "category": "cat1",
+        "evidenceIds": []
+      },
+      {
+        "id": "alt1",
+        "type": "alternative",
+        "name": "Sourcegraph Cody",
+        "url": "https://github.com/sourcegraph/cody",
+        "stars": 3000,
+        "oneLiner": "AI coding assistant with codebase context.",
+        "similarity": 0.55,
+        "differentiator": "Commercial, IDE-embedded, not a static graph.",
+        "category": "cat1",
+        "evidenceIds": [
+          "ev2"
+        ]
+      },
+      {
+        "id": "alt2",
+        "type": "alternative",
+        "name": "CodeSee",
+        "url": "https://github.com/Codesee-io",
+        "stars": 800,
+        "oneLiner": "Visual maps of a codebase.",
+        "similarity": 0.7,
+        "differentiator": "Hosted SaaS; less LLM-driven narrative.",
+        "category": "cat1",
+        "evidenceIds": []
+      },
+      {
+        "id": "cat1",
+        "type": "category",
+        "label": "Code comprehension tools",
+        "evidenceIds": []
+      }
     ],
     "edges": [
-      { "id": "le1", "source": "alt1", "target": "self1", "type": "alternativeTo" },
-      { "id": "le2", "source": "alt2", "target": "self1", "type": "competesWith" },
-      { "id": "le3", "source": "alt1", "target": "alt2", "type": "sharesApproach" }
+      {
+        "id": "le1",
+        "source": "alt1",
+        "target": "self1",
+        "type": "alternativeTo"
+      },
+      {
+        "id": "le2",
+        "source": "alt2",
+        "target": "self1",
+        "type": "competesWith"
+      },
+      {
+        "id": "le3",
+        "source": "alt1",
+        "target": "alt2",
+        "type": "sharesApproach"
+      }
     ]
   },
   "evidence": [
-    { "id": "ev1", "claim": "Ships an interactive web dashboard", "source": "README", "url": "https://github.com/Lum1104/Understand-Anything", "verified": true },
-    { "id": "ev2", "claim": "Cody has 3k+ GitHub stars", "source": "GitHub", "url": "https://github.com/sourcegraph/cody", "verified": true }
+    {
+      "id": "ev1",
+      "claim": "Ships an interactive web dashboard",
+      "source": "README",
+      "url": "https://github.com/Lum1104/Understand-Anything",
+      "verified": true
+    },
+    {
+      "id": "ev4",
+      "claim": "The assembler CLI validates fragments and exits 0/1/2",
+      "source": "packages/pipeline/src/cli.ts",
+      "verified": true
+    },
+    {
+      "id": "ev5",
+      "claim": "buildAtlasView is a pure, deterministic adapter",
+      "source": "packages/dashboard/src/adapters/atlas.ts",
+      "verified": true
+    },
+    {
+      "id": "ev6",
+      "claim": "Analyzer agents return only JSON fragments",
+      "source": "agents/essence-analyzer.md",
+      "verified": true
+    },
+    {
+      "id": "ev7",
+      "claim": "Per-stream sha256 fingerprints gate recomputation",
+      "source": "packages/pipeline/src/fingerprint.ts",
+      "verified": true
+    },
+    {
+      "id": "ev8",
+      "claim": "An opt-in post-commit hook flags stale streams",
+      "source": "packages/pipeline/src/autoupdate.ts",
+      "verified": true
+    },
+    {
+      "id": "ev9",
+      "claim": "The atlas exports as a Markdown outline",
+      "source": "packages/export/src/atlasToMarkdown.ts",
+      "verified": true
+    },
+    {
+      "id": "ev10",
+      "claim": "report.html is a self-contained print page",
+      "source": "packages/export/src/printHtml.ts",
+      "verified": true
+    },
+    {
+      "id": "ev11",
+      "claim": "A two-axis wizard sets depth and broadness",
+      "source": "skills/grasp/SKILL.md",
+      "verified": true
+    },
+    {
+      "id": "ev12",
+      "claim": "Camera altitudes drive level-of-detail on the globe",
+      "source": "packages/dashboard/src/components/globeImpl.tsx",
+      "verified": true
+    },
+    {
+      "id": "ev13",
+      "claim": "A Zod schema is the single contract between agents and UI",
+      "source": "packages/schema/src/schema.ts",
+      "verified": true
+    },
+    {
+      "id": "ev14",
+      "claim": "An accessible outline mirrors the globe",
+      "source": "packages/dashboard/src/components/AtlasOutline.tsx",
+      "verified": true
+    },
+    {
+      "id": "ev2",
+      "claim": "Cody has 3k+ GitHub stars",
+      "source": "GitHub",
+      "url": "https://github.com/sourcegraph/cody",
+      "verified": true
+    }
   ]
 }

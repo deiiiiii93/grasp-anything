@@ -22,7 +22,8 @@ describe("briefToMarkdown", () => {
     expect(md).toContain("## How it works");
     expect(md).toContain("Schema validator");
     expect(md).toContain("## Competitive landscape");
-    expect((md.match(/```mermaid/g) ?? []).length).toBe(1);
+    // 1 landscape block + 1 flow diagram per flow continent (workflows, businessFlows).
+    expect((md.match(/```mermaid/g) ?? []).length).toBe(3);
   });
 
   it("footnotes cited evidence with a verified/inferred tag", () => {

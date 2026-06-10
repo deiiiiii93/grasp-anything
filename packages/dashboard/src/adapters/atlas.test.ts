@@ -38,12 +38,15 @@ describe("buildAtlasView", () => {
   it("exposes landmark detail-panel fields", () => {
     const view = buildAtlasView(sampleDoc);
     const lm = view.landmarks.find((l) => l.id === "lm_validator")!;
-    expect(lm.whyItMatters).toMatch(/trustworthy/);
+    expect(lm.whyItMatters).toMatch(/untrusted agent output/);
     expect(lm.techTag).toBe("Zod");
-    expect(lm.evidence.map((e) => e.id)).toEqual([]);
+    expect(lm.evidence.map((e) => e.id)).toEqual(["ev13"]);
   });
 
-  it("has no flow arcs in Phase 1", () => {
-    expect(buildAtlasView(sampleDoc).arcs).toEqual([]);
+  it("resolves the golden sample's flows into same-continent arcs", () => {
+    const view = buildAtlasView(sampleDoc);
+    expect(view.arcs.length).toBe(6);
+    const contByArc = new Set(view.arcs.map((a) => a.continentId));
+    expect(contByArc).toEqual(new Set(["c_wf", "c_biz"]));
   });
 });
