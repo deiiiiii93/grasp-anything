@@ -2,6 +2,8 @@ import { lazy, Suspense, useMemo, useState } from "react";
 import type { BriefDoc } from "@grasp/schema";
 import { buildCards, buildSignals } from "./adapters/brief";
 import { buildAtlasView, selectionContext } from "./adapters/atlas";
+import { buildVoyage } from "./adapters/voyage";
+import { VoyageOverlay } from "./components/VoyageOverlay";
 import { Header } from "./components/Header";
 import { BriefCard } from "./components/BriefCard";
 import { LandscapeGraph } from "./components/LandscapeGraph";
@@ -31,6 +33,8 @@ export function App({ doc }: { doc: BriefDoc }) {
   const [tab, setTab] = useState<Tab>("atlas");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [listView, setListView] = useState(false);
+  const [voyaging, setVoyaging] = useState(false);
+  const voyage = useMemo(() => buildVoyage(view), [view]);
 
   const ctx = useMemo(() => selectionContext(view, selectedId), [view, selectedId]);
   const detailNode: DetailNode = useMemo(() => {
@@ -84,15 +88,23 @@ export function App({ doc }: { doc: BriefDoc }) {
             <div className="atlas-center">
               <div className="atlas-crumb-row">
                 <span className="atlas-breadcrumb" data-testid="atlas-breadcrumb">{crumb.join(" › ")}</span>
+                <button type="button" className="voyage-toggle" aria-pressed={voyaging} onClick={() => setVoyaging((v) => !v)}>
+                  {voyaging ? "✕ End voyage" : "▶ Voyage"}
+                </button>
                 <button type="button" className="list-view-toggle" aria-pressed={listView} onClick={() => setListView((v) => !v)}>List view</button>
               </div>
-              {listView ? (
-                <AtlasOutline view={view} selectedId={selectedId} onSelect={setSelectedId} />
-              ) : (
-                <Suspense fallback={<div className="atlas-globe" data-testid="atlas-globe-loading">Loading globe…</div>}>
-                  <AtlasGlobe view={view} selectedId={selectedId} onSelect={setSelectedId} />
-                </Suspense>
-              )}
+              <div className="atlas-stage">
+                {listView ? (
+                  <AtlasOutline view={view} selectedId={selectedId} onSelect={setSelectedId} />
+                ) : (
+                  <Suspense fallback={<div className="atlas-globe" data-testid="atlas-globe-loading">Loading globe…</div>}>
+                    <AtlasGlobe view={view} selectedId={selectedId} onSelect={setSelectedId} />
+                  </Suspense>
+                )}
+                {voyaging && (
+                  <VoyageOverlay stops={voyage} onNavigate={setSelectedId} onExit={() => setVoyaging(false)} />
+                )}
+              </div>
               <AltitudeRail level={level} onAscend={ascendTo} />
             </div>
             <AtlasDetail node={detailNode} />
