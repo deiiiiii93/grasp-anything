@@ -2,6 +2,8 @@
 
 Turn any repository into a **strategic brief**: five answers (idea, problem, why it wins, how it works, similar repos) backed by two interactive graphs — a product atlas and a competitive landscape.
 
+![Grasp Product Atlas](ui_design.jpg)
+
 ## Install
 
 ```
