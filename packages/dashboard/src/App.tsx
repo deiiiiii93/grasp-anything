@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import type { BriefDoc } from "@grasp/schema";
 import { buildCards, buildSignals } from "./adapters/brief";
 import { buildAtlasView, relatedFlows, selectionContext } from "./adapters/atlas";
@@ -18,6 +18,18 @@ import { AtlasListPanel } from "./components/AtlasListPanel";
 const AtlasGlobe = lazy(() => import("./components/AtlasGlobe"));
 
 type Tab = "strategic" | "atlas" | "landscape" | "evidence";
+type Theme = "dark" | "light";
+
+// Saved preference wins; otherwise follow the OS. Storage can be unavailable
+// (file://, privacy modes) — fall back silently.
+function initialTheme(): Theme {
+  try {
+    const saved = localStorage.getItem("grasp-theme");
+    if (saved === "light" || saved === "dark") return saved;
+    if (typeof window.matchMedia === "function" && window.matchMedia("(prefers-color-scheme: light)").matches) return "light";
+  } catch { /* default below */ }
+  return "dark";
+}
 
 const GUARANTEES = [
   ["♿", "Accessible", "Use List view for screen readers and keyboard navigation."],
@@ -36,6 +48,11 @@ export function App({ doc }: { doc: BriefDoc }) {
   const [listView, setListView] = useState(false);
   const [voyaging, setVoyaging] = useState(false);
   const voyage = useMemo(() => buildVoyage(view), [view]);
+  const [theme, setTheme] = useState<Theme>(initialTheme);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem("grasp-theme", theme); } catch { /* storage unavailable */ }
+  }, [theme]);
 
   const ctx = useMemo(() => selectionContext(view, selectedId), [view, selectedId]);
   const detailNode: DetailNode = useMemo(() => {
@@ -66,13 +83,23 @@ export function App({ doc }: { doc: BriefDoc }) {
   return (
     <main className="app">
       <Header signals={signals} />
-      <nav className="top-nav" role="tablist">
-        {(["strategic", "atlas", "landscape", "evidence"] as Tab[]).map((t) => (
-          <button key={t} type="button" role="tab" aria-selected={tab === t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
-            {t === "strategic" ? "Strategic" : t === "atlas" ? "Atlas" : t === "landscape" ? "Landscape" : "Evidence"}
-          </button>
-        ))}
-      </nav>
+      <div className="nav-row">
+        <nav className="top-nav" role="tablist">
+          {(["strategic", "atlas", "landscape", "evidence"] as Tab[]).map((t) => (
+            <button key={t} type="button" role="tab" aria-selected={tab === t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
+              {t === "strategic" ? "Strategic" : t === "atlas" ? "Atlas" : t === "landscape" ? "Landscape" : "Evidence"}
+            </button>
+          ))}
+        </nav>
+        <button
+          type="button"
+          className="theme-toggle"
+          aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+          onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+        >
+          {theme === "dark" ? "☀️" : "🌙"}
+        </button>
+      </div>
 
       {tab === "strategic" && (
         <section className="cards-grid">

@@ -35,4 +35,15 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("tab", { name: "Landscape" }));
     expect(screen.getByTestId("landscape-graph")).toBeInTheDocument();
   });
+
+  it("toggles light/dark theme on <html> and persists it", () => {
+    localStorage.removeItem("grasp-theme");
+    render(<App doc={sampleDoc} />);
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    fireEvent.click(screen.getByRole("button", { name: /switch to light theme/i }));
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(localStorage.getItem("grasp-theme")).toBe("light");
+    fireEvent.click(screen.getByRole("button", { name: /switch to dark theme/i }));
+    expect(document.documentElement.dataset.theme).toBe("dark");
+  });
 });

@@ -131,6 +131,19 @@ rendering / `esc()` / `mdText()`; the new story strings are static constants.
 - Export: epigraph lines appear, still escaped, Mermaid untouched.
 - Globe remains mocked in jsdom; polygons layer behind the same mock.
 
+## 5.1 Addendum — same-day user review round
+
+After the visual review the user asked for: (a) the globe to occupy most of
+the screen, (b) full use of the browser width, (c) a clean Apple-style look
+with a light/dark theme switch. Implemented as: full-bleed shell (`.app`
+max-width none), globe track absorbs spare width and sizes against viewport
+height, Apple segmented top-nav + pill controls + 14px card radii, and a
+`data-theme` variable system (dark default, light = Apple-gray) with a
+persisted toggle (`localStorage["grasp-theme"]`, OS preference fallback,
+no-flash inline script in `index.html`). On-globe overlays (altitude badge,
+voyage card) keep a fixed dark-glass palette in both themes — the globe is
+always a dark "space" surface.
+
 ## 6. Phasing (each independently green)
 
 1. Schema warnings + rich golden sample (they must land together).
