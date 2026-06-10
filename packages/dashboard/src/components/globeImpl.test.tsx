@@ -1,0 +1,63 @@
+import { render, screen, fireEvent } from "@testing-library/react";
+import { vi } from "vitest";
+import { buildAtlasView } from "../adapters/atlas";
+import { sampleDoc } from "../test-utils/sample";
+
+const captured = vi.hoisted(() => ({ props: null as Record<string, unknown> | null }));
+vi.mock("react-globe.gl", async () => {
+  const { forwardRef } = await import("react");
+  return {
+    default: forwardRef(function MockGlobe(props: Record<string, unknown>, _ref: unknown) {
+      captured.props = props;
+      return null;
+    }),
+  };
+});
+
+import { GlobeImpl } from "./globeImpl";
+
+const view = buildAtlasView(sampleDoc);
+const noop = () => {};
+
+beforeEach(() => {
+  captured.props = null;
+  // world.geojson fetch stays in flight; polygons are decoration.
+  vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+});
+afterEach(() => vi.unstubAllGlobals());
+
+describe("GlobeImpl billboards", () => {
+  it("renders sprite billboards for all three tiers when a city is selected", () => {
+    render(<GlobeImpl view={view} selectedId="city_core" onSelect={noop} width={800} height={600} />);
+    const cont = screen.getByTestId("bb-c_arch");
+    expect(cont.className).toContain("atlas-bb-continent");
+    expect(cont.querySelector("img")?.getAttribute("src")).toBe("./atlas/landmarks/architecture.png");
+    const city = screen.getByTestId("bb-city_core");
+    expect(city.className).toContain("atlas-bb-city");
+    expect(city.querySelector("img")?.getAttribute("src")).toBe("./atlas/cities/architecture.png");
+    const lm = screen.getByTestId("bb-lm_validator");
+    expect(lm.className).toContain("atlas-bb-landmark");
+    expect(lm.querySelector("img")?.getAttribute("src")).toBe("./atlas/pins/architecture.png");
+  });
+
+  it("landmark labels carry their deterministic stagger offset", () => {
+    render(<GlobeImpl view={view} selectedId="city_core" onSelect={noop} width={800} height={600} />);
+    const labels = ["bb-lm_validator", "bb-lm_assemble"].map(
+      (id) => screen.getByTestId(id).querySelector(".atlas-bb-label") as HTMLElement,
+    );
+    expect(labels.map((l) => l.style.getPropertyValue("--stagger"))).toEqual(["-12px", "12px"]);
+  });
+
+  it("clicking a billboard bubbles its id via onSelect", () => {
+    const onSelect = vi.fn();
+    render(<GlobeImpl view={view} selectedId="city_core" onSelect={onSelect} width={800} height={600} />);
+    fireEvent.click(screen.getByTestId("bb-lm_validator"));
+    expect(onSelect).toHaveBeenCalledWith("lm_validator");
+  });
+
+  it("labelsData is retired — cities/landmarks no longer go through globe.gl labels", () => {
+    render(<GlobeImpl view={view} selectedId="city_core" onSelect={noop} width={800} height={600} />);
+    expect(captured.props).not.toBeNull();
+    expect("labelsData" in (captured.props as object)).toBe(false);
+  });
+});
