@@ -132,9 +132,11 @@ export function App({ doc }: { doc: BriefDoc }) {
                 {listView ? (
                   <AtlasOutline view={view} selectedId={selectedId} onSelect={setSelectedId} />
                 ) : (
-                  <Suspense fallback={<div className="atlas-globe" data-testid="atlas-globe-loading">Loading globe…</div>}>
-                    <AtlasGlobe view={view} selectedId={selectedId} onSelect={setSelectedId} />
-                  </Suspense>
+                  <div className="globe-wrap">
+                    <Suspense fallback={<div className="atlas-globe" data-testid="atlas-globe-loading">Loading globe…</div>}>
+                      <AtlasGlobe view={view} selectedId={selectedId} onSelect={setSelectedId} />
+                    </Suspense>
+                  </div>
                 )}
                 {voyaging && (
                   <VoyageOverlay stops={voyage} onNavigate={setSelectedId} onExit={() => setVoyaging(false)} />

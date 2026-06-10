@@ -228,6 +228,8 @@ body {
 .list-view-toggle:hover { color: var(--text); }
 
 /* ─── Atlas globe ─────────────────────────────────────────────────── */
+/* Narrowed so the globe doesn't slide under the liquid-glass context card. */
+.globe-wrap { width: calc(100% - min(384px, calc(38vw + 24px))); }
 .atlas-globe { width: 100%; overflow: hidden; border-radius: 14px; background: #0b1020; }
 
 /* ─── Atlas globe fallback / outline ─────────────────────────────── */
@@ -412,11 +414,14 @@ body {
   scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
   border-radius: 20px;
 
-  /* Liquid glass: diagonal gradient sheen over a blur layer. */
+  /* Fixed light palette so text is always readable over any globe color. */
+  color: #e8ecf6;
+
+  /* Liquid glass: opaque dark base (ensures contrast) + diagonal sheen. */
   background: linear-gradient(
     160deg,
-    rgba(255, 255, 255, 0.11) 0%,
-    rgba(12, 18, 38, 0.52) 100%
+    rgba(22, 32, 58, 0.88) 0%,
+    rgba(8, 12, 24, 0.96) 100%
   );
   backdrop-filter: blur(48px) saturate(180%) brightness(1.06);
   -webkit-backdrop-filter: blur(48px) saturate(180%) brightness(1.06);
@@ -433,11 +438,26 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.40),
     inset 0 -1px 0 rgba(255, 255, 255, 0.05);
 }
+/* Muted sub-elements in the glass context. */
+.stage-detail .atlas-detail-kind,
+.stage-detail .atlas-detail-empty,
+.stage-detail .atlas-detail-counts,
+.stage-detail .atlas-section-label,
+.stage-detail .atlas-story-lesson,
+.stage-detail .atlas-story-motif { color: #7e8fa8; }
 .stage-detail .atlas-detail {
   background: transparent;
   border: none;
   border-radius: 0;
   padding: 14px 16px;
+}
+/* Inner panels in the glass use a dark translucent fill instead of --panel-2. */
+.stage-detail .atlas-story-card,
+.stage-detail .flow-chip,
+.stage-detail .atlas-child-list button {
+  background: rgba(8, 14, 30, 0.70);
+  border-color: rgba(255, 255, 255, 0.10);
+  color: #e8ecf6;
 }
 
 /* ─── Altitude badge (top-left chip over the globe) ───────────────── */
