@@ -52,7 +52,7 @@ describe("assemble", () => {
     const land = result.doc.landscapeGraph;
     expect(land.nodes).toHaveLength(1);
     expect(land.nodes[0].type).toBe("self");
-    expect(land.nodes[0].name).toBe("Lum1104/Understand-Anything");
+    expect(land.nodes[0].name).toBe("fuxinyao/grasp");
     expect(land.edges).toEqual([]);
     expect(validateBrief(result.doc).ok).toBe(true);
   });

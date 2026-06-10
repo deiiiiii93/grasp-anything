@@ -1,7 +1,7 @@
 {
-  "idea": "Turn any codebase into an interactive knowledge graph so newcomers can grasp its architecture without reading every file.",
-  "problem": "Onboarding into an unfamiliar codebase is slow and intimidating; engineers must reverse-engineer structure from scattered files.",
-  "how": "LLM sub-agents analyze files in batches and emit a validated JSON graph; a deterministic core validates and fingerprints it; a React dashboard renders it with layered layout.",
+  "idea": "Turn any repository into a strategic brief — five evidence-backed answers and a 3D product atlas explored from orbit down to the landmarks.",
+  "problem": "Evaluating someone else's product from its repo is slow: code tours explain how it works, never why it wins, and PMs end up reverse-engineering strategy from scattered files.",
+  "how": "LLM analyzer agents emit JSON fragments; a deterministic CLI validates them against one Zod contract and renders a self-contained dashboard; per-stream fingerprints keep re-runs incremental.",
   "atlas": {
     "continents": [
       {
@@ -574,8 +574,7 @@
     {
       "id": "ev1",
       "claim": "Ships an interactive web dashboard",
-      "source": "README",
-      "url": "https://github.com/Lum1104/Understand-Anything",
+      "source": "packages/dashboard/src/App.tsx",
       "verified": true
     },
     {

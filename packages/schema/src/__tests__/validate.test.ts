@@ -9,7 +9,7 @@ describe("BriefDocSchema", () => {
       console.error(result.error.issues);
     }
     expect(result.success).toBe(true);
-    expect(result.data?.meta.repo).toBe("Lum1104/Understand-Anything");
+    expect(result.data?.meta.repo).toBe("fuxinyao/grasp");
     expect(result.data?.atlas.continents.length).toBe(6);
     expect(result.data?.landscapeGraph.nodes.length).toBe(4);
   });

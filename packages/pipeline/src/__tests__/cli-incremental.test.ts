@@ -7,7 +7,7 @@ import { runCli } from "../cli-run";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const fixturesDir = resolve(here, "fixtures");
-const ANALYZED_AT = "2026-06-08T12:00:00Z";
+const ANALYZED_AT = "2026-06-10T12:00:00Z";
 const OLD = "2026-01-01T00:00:00Z";
 
 let work: string;

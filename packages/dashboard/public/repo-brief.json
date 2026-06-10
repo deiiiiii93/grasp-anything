@@ -1,26 +1,24 @@
 {
   "meta": {
-    "repo": "Lum1104/Understand-Anything",
-    "url": "https://github.com/Lum1104/Understand-Anything",
-    "analyzedAt": "2026-06-08T12:00:00Z",
+    "repo": "fuxinyao/grasp",
+    "analyzedAt": "2026-06-10T12:00:00Z",
     "depth": "skim",
     "broadness": "web",
     "signals": {
-      "stars": 1200,
-      "lastCommit": "2026-06-01",
+      "lastCommit": "2026-06-10",
       "language": "TypeScript"
     }
   },
   "brief": {
-    "idea": "Turn any codebase into an interactive knowledge graph so newcomers can grasp its architecture without reading every file.",
-    "problem": "Onboarding into an unfamiliar codebase is slow and intimidating; engineers must reverse-engineer structure from scattered files.",
-    "why": "It packages a heavy LLM analysis pipeline behind a one-command plugin and renders results in a polished dashboard, lowering the effort to near zero.",
-    "how": "LLM sub-agents analyze files in batches and emit a validated JSON graph; a deterministic core validates and fingerprints it; a React dashboard renders it with layered layout.",
-    "takeaway": "Worth it if you regularly onboard onto large or unfamiliar repos.",
+    "idea": "Turn any repository into a strategic brief — five evidence-backed answers and a 3D product atlas explored from orbit down to the landmarks.",
+    "problem": "Evaluating someone else's product from its repo is slow: code tours explain how it works, never why it wins, and PMs end up reverse-engineering strategy from scattered files.",
+    "why": "It separates judgment from rendering: LLM agents may be fuzzy, but every claim they emit is validated against one contract, linked to evidence, and rendered deterministically — a brief that is playful on the surface and auditable underneath.",
+    "how": "LLM analyzer agents emit JSON fragments; a deterministic CLI validates them against one Zod contract and renders a self-contained dashboard; per-stream fingerprints keep re-runs incremental.",
+    "takeaway": "Worth it if you regularly size up unfamiliar repos and want the 'so what', not a code tour.",
     "updatedAt": {
-      "essence": "2026-06-08T12:00:00Z",
-      "success": "2026-06-08T12:00:00Z",
-      "landscape": "2026-06-08T12:00:00Z"
+      "essence": "2026-06-10T12:00:00Z",
+      "success": "2026-06-10T12:00:00Z",
+      "landscape": "2026-06-10T12:00:00Z"
     },
     "evidence": {
       "why": [
@@ -601,9 +599,7 @@
       {
         "id": "self1",
         "type": "self",
-        "name": "Understand-Anything",
-        "url": "https://github.com/Lum1104/Understand-Anything",
-        "stars": 1200,
+        "name": "grasp",
         "category": "cat1",
         "evidenceIds": []
       },
@@ -665,8 +661,7 @@
     {
       "id": "ev1",
       "claim": "Ships an interactive web dashboard",
-      "source": "README",
-      "url": "https://github.com/Lum1104/Understand-Anything",
+      "source": "packages/dashboard/src/App.tsx",
       "verified": true
     },
     {

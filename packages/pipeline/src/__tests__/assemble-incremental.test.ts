@@ -6,7 +6,7 @@ import essence from "./fixtures/essence.json";
 import success from "./fixtures/success.json";
 import landscape from "./fixtures/landscape.json";
 
-const ANALYZED_AT = "2026-06-08T12:00:00Z"; // == meta.json analyzedAt
+const ANALYZED_AT = "2026-06-10T12:00:00Z"; // == meta.json analyzedAt
 const OLD = "2026-01-01T00:00:00Z";
 
 describe("assemble with per-stream updatedAt override", () => {

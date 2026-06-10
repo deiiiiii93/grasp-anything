@@ -20,7 +20,7 @@ describe("LandscapeGraph", () => {
   it("defaults the detail panel to the self node (no GitHub link)", () => {
     render(<LandscapeGraph doc={sampleDoc} />);
     const detail = screen.getByTestId("landscape-detail");
-    expect(within(detail).getByRole("heading")).toHaveTextContent("Understand-Anything");
+    expect(within(detail).getByRole("heading")).toHaveTextContent("grasp");
     expect(within(detail).queryByRole("link")).toBeNull();
   });
 

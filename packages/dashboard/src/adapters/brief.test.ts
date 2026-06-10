@@ -5,7 +5,7 @@ describe("resolveEvidence", () => {
   it("resolves known ids to chips", () => {
     const chips = resolveEvidence(sampleDoc, ["ev1"]);
     expect(chips).toHaveLength(1);
-    expect(chips[0]).toMatchObject({ id: "ev1", source: "README", verified: true });
+    expect(chips[0]).toMatchObject({ id: "ev1", source: "packages/dashboard/src/App.tsx", verified: true });
   });
 
   it("ignores unknown ids", () => {
@@ -49,9 +49,8 @@ describe("buildSignals", () => {
   it("extracts repo, takeaway, and meta signals", () => {
     const s = buildSignals(sampleDoc);
     expect(s).toMatchObject({
-      repo: "Lum1104/Understand-Anything",
+      repo: "fuxinyao/grasp",
       takeaway: sampleDoc.brief.takeaway,
-      stars: 1200,
       language: "TypeScript",
       depth: "skim",
       broadness: "web",

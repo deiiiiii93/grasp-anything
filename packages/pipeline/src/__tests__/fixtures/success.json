@@ -1,6 +1,10 @@
 {
-  "why": "It packages a heavy LLM analysis pipeline behind a one-command plugin and renders results in a polished dashboard, lowering the effort to near zero.",
-  "takeaway": "Worth it if you regularly onboard onto large or unfamiliar repos.",
+  "why": "It separates judgment from rendering: LLM agents may be fuzzy, but every claim they emit is validated against one contract, linked to evidence, and rendered deterministically — a brief that is playful on the surface and auditable underneath.",
+  "takeaway": "Worth it if you regularly size up unfamiliar repos and want the 'so what', not a code tour.",
   "evidence": [],
-  "briefEvidence": { "why": ["ev1"] }
+  "briefEvidence": {
+    "why": [
+      "ev1"
+    ]
+  }
 }
