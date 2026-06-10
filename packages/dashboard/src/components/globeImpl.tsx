@@ -104,7 +104,7 @@ export function GlobeImpl({
       g.pointOfView({ lat: ctx.lat, lng: ctx.lng, altitude: ALT[ctx.level] }, 900);
       g.controls().autoRotate = false;
     } else {
-      g.pointOfView({ lat: 18, lng: 45, altitude: ALT[1] }, 900);
+      g.pointOfView({ lat: 18, lng: 15, altitude: ALT[1] }, 900);
       g.controls().autoRotate = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

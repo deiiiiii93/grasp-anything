@@ -228,8 +228,6 @@ body {
 .list-view-toggle:hover { color: var(--text); }
 
 /* ─── Atlas globe ─────────────────────────────────────────────────── */
-/* Narrowed so the globe doesn't slide under the liquid-glass context card. */
-.globe-wrap { width: calc(100% - min(384px, calc(38vw + 24px))); }
 .atlas-globe { width: 100%; overflow: hidden; border-radius: 14px; background: #0b1020; }
 
 /* ─── Atlas globe fallback / outline ─────────────────────────────── */
