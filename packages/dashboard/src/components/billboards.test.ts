@@ -31,10 +31,10 @@ describe("buildBillboards", () => {
 });
 
 describe("staggerOffsetPx", () => {
-  it("alternates above/below and widens every pair: -12, +12, -20, +20", () => {
+  it("steps ring-neighbors to different depths below the pin: 0, 14, 28, 0", () => {
     const mk = (i: number) =>
       ({ tier: "landmark", staggerIndex: i } as Parameters<typeof staggerOffsetPx>[0]);
-    expect([0, 1, 2, 3].map((i) => staggerOffsetPx(mk(i)))).toEqual([-12, 12, -20, 20]);
+    expect([0, 1, 2, 3].map((i) => staggerOffsetPx(mk(i)))).toEqual([0, 14, 28, 0]);
     expect(staggerOffsetPx({ tier: "city", staggerIndex: 0 } as Parameters<typeof staggerOffsetPx>[0])).toBe(0);
   });
 });

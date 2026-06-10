@@ -114,9 +114,10 @@ nothing; arcs/polygons unchanged). The existing continent rAF overlay in
   focused city's billboard scales to ~60 % and opacity ~0.45 — it becomes
   context. Selected billboard gets a z-index bump.
 - **Collision:** landmark labels get a deterministic vertical stagger —
-  `staggerIndex` = the landmark's index within its city, alternating
-  above/below the sprite (`±(12 + 8·⌊i/2⌋) px`). No physics, fully
-  deterministic, testable.
+  `staggerIndex` = the landmark's index within its city, stepped to different
+  depths below the sprite (`(i mod 3) · 14 px`; below-only so a label never
+  rides up onto its own pin — adjusted during the Task 10 screenshot pass).
+  No physics, fully deterministic, testable.
 - **Interaction:** billboards stay `<button>`s → `onSelect(id)`; `title`
   attr for hover. Arc/polygon/globe click handlers unchanged.
 - **Failure tier (warning, non-fatal):** sprite `onerror` swaps the `<img>`

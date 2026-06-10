@@ -45,7 +45,7 @@ describe("GlobeImpl billboards", () => {
     const labels = ["bb-lm_validator", "bb-lm_assemble"].map(
       (id) => screen.getByTestId(id).querySelector(".atlas-bb-label") as HTMLElement,
     );
-    expect(labels.map((l) => l.style.getPropertyValue("--stagger"))).toEqual(["-12px", "12px"]);
+    expect(labels.map((l) => l.style.getPropertyValue("--stagger"))).toEqual(["0px", "14px"]);
   });
 
   it("clicking a billboard bubbles its id via onSelect", () => {

@@ -50,7 +50,7 @@ function spriteFailed(e: React.SyntheticEvent<HTMLImageElement>) {
 const TIER_SCALE: Record<BillboardTier, { mult: number; min: number; max: number }> = {
   continent: { mult: 52, min: 34, max: 160 },
   city: { mult: 20, min: 28, max: 64 },
-  landmark: { mult: 12, min: 18, max: 36 },
+  landmark: { mult: 16, min: 20, max: 46 },
 };
 
 export function GlobeImpl({

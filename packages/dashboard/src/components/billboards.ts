@@ -18,12 +18,12 @@ export interface Billboard {
   title: string; // hover text
 }
 
-// Deterministic label collision-avoidance: alternate above/below the pin and
-// widen every pair: -12, +12, -20, +20, ...
+// Deterministic label collision-avoidance: neighbors (adjacent on the ring
+// around their city) drop to different depths below the pin — 0, 14, 28, 0, …
+// Below-only so a label never rides up onto its own sprite.
 export function staggerOffsetPx(b: Pick<Billboard, "tier" | "staggerIndex">): number {
   if (b.tier !== "landmark") return 0;
-  const i = b.staggerIndex;
-  return (i % 2 === 0 ? -1 : 1) * (12 + 8 * Math.floor(i / 2));
+  return (b.staggerIndex % 3) * 14;
 }
 
 // Same LOD + focus-filter rules the labelsData path used: cities appear at
