@@ -18,6 +18,15 @@ and re-assemble.
 
 ## Phase 0 — Resolve target + run the wizard
 
+0. **Dist gate** — check that the dashboard has been built:
+
+   ```bash
+   test -f "$CLAUDE_PLUGIN_ROOT/packages/dashboard/dist/index.html" && echo "ok" || echo "missing"
+   ```
+
+   If `missing`: tell the user "Grasp needs a one-time build step. Run
+   `/grasp:setup` first, then try `/grasp` again." and **stop** — do not proceed.
+
 1. Determine the target: a bare `/grasp` means the current directory; otherwise a
    local path or a public GitHub URL. For a URL, shallow-clone to a temp dir
    (`git clone --depth 1`); if that fails, fall back to README/metadata via the
@@ -36,7 +45,7 @@ instead of redoing everything. After gathering sources (Phase 1) write a
 "broadness": "web" }` (paths relative to the target) — then run:
 
 ```bash
-npx tsx packages/pipeline/src/state-cli.ts --target <target> \
+"$CLAUDE_PLUGIN_ROOT/node_modules/.bin/tsx" "$CLAUDE_PLUGIN_ROOT/packages/pipeline/src/state-cli.ts" --target <target> \
   --sources <target>/.grasp/sources.json
 ```
 
@@ -77,8 +86,8 @@ Also write `meta.json` (from Phase 1) into the same `fragments/` dir.
 Run the deterministic CLI:
 
 ```bash
-npx tsx packages/pipeline/src/cli.ts <target>/.grasp/fragments \
-  --target <target> --dist packages/dashboard/dist \
+"$CLAUDE_PLUGIN_ROOT/node_modules/.bin/tsx" "$CLAUDE_PLUGIN_ROOT/packages/pipeline/src/cli.ts" <target>/.grasp/fragments \
+  --target <target> --dist "$CLAUDE_PLUGIN_ROOT/packages/dashboard/dist" \
   --prior <target>/.grasp/dashboard/repo-brief.json \
   --stale <comma-separated stale streams from Phase 0.5>
 ```
@@ -101,8 +110,7 @@ On a first run (no prior brief) omit `--prior`/`--stale`. `--prior` preserves th
   fragment, and re-run the CLI **once**. If it still fails, write the partial
   brief and warn the user which section is incomplete.
 - Exit 2: a usage/IO problem (missing fragment file, unreadable JSON, or the
-  dashboard `dist` is missing — build it with `npm run build --workspace
-  @grasp/dashboard`).
+  dashboard `dist` is missing — build it with `cd "$CLAUDE_PLUGIN_ROOT" && npm run build -w @grasp/dashboard`).
 
 ## Phase 4 — Open the report
 
@@ -116,7 +124,7 @@ To share the brief outside the dashboard, run the **`grasp-export`** CLI against
 the written brief:
 
 ```bash
-npx tsx packages/export/src/cli.ts <target>/.grasp/dashboard/repo-brief.json \
+"$CLAUDE_PLUGIN_ROOT/node_modules/.bin/tsx" "$CLAUDE_PLUGIN_ROOT/packages/export/src/cli.ts" <target>/.grasp/dashboard/repo-brief.json \
   --format both --out <target>/.grasp
 ```
 
@@ -142,5 +150,5 @@ chrome --headless --print-to-pdf="<target>/.grasp/report.pdf" "<target>/.grasp/r
 - `--refresh-landscape` — refresh the competitive landscape (otherwise market-stable).
 - `--auto-update` — install a `post-commit` git hook that flags stale streams after
   each commit (it reminds you to run `/grasp`; it does not regenerate autonomously):
-  `npx tsx packages/pipeline/src/autoupdate-cli.ts --target <target>`. Disable with
+  `"$CLAUDE_PLUGIN_ROOT/node_modules/.bin/tsx" "$CLAUDE_PLUGIN_ROOT/packages/pipeline/src/autoupdate-cli.ts" --target <target>`. Disable with
   the same command plus `--off`.
