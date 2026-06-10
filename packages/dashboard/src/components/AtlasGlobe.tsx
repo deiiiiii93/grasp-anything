@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AtlasOutline } from "./AtlasOutline";
+import { AltitudeBadge } from "./AltitudeBadge";
 import { webglAvailable, GlobeImpl } from "./globeImpl";
 import type { AtlasView } from "../adapters/atlas";
 
@@ -40,6 +41,7 @@ export function AtlasGlobe({
   return (
     <div className="atlas-globe" data-testid="atlas-globe" ref={containerRef}>
       <GlobeImpl view={view} selectedId={selectedId} onSelect={onSelect} width={size.w} height={size.h} />
+      <AltitudeBadge view={view} selectedId={selectedId} />
     </div>
   );
 }

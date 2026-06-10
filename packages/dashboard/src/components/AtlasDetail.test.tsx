@@ -31,4 +31,14 @@ describe("AtlasDetail per altitude", () => {
     render(<AtlasDetail node={{ kind: "landmark", landmark: lm }} />);
     expect(screen.getByText("Determinism.")).toBeInTheDocument();
   });
+  it("renders related flows as source → target chips", () => {
+    const flows = [{
+      id: "f1", continentId: "c", type: "calls" as const,
+      sourceId: "l", targetId: "x", sourceName: "Parser", targetName: "Store",
+      startLat: 0, startLng: 0, endLat: 1, endLng: 1, color: "#fff", label: "writes",
+    }];
+    render(<AtlasDetail node={{ kind: "landmark", landmark: lm }} flows={flows} />);
+    expect(screen.getByTestId("related-flows")).toHaveTextContent("Parser → Store");
+    expect(screen.getByText("writes")).toBeInTheDocument();
+  });
 });

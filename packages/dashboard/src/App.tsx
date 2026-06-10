@@ -1,7 +1,7 @@
 import { lazy, Suspense, useMemo, useState } from "react";
 import type { BriefDoc } from "@grasp/schema";
 import { buildCards, buildSignals } from "./adapters/brief";
-import { buildAtlasView, selectionContext } from "./adapters/atlas";
+import { buildAtlasView, relatedFlows, selectionContext } from "./adapters/atlas";
 import { buildVoyage } from "./adapters/voyage";
 import { VoyageOverlay } from "./components/VoyageOverlay";
 import { Header } from "./components/Header";
@@ -107,7 +107,7 @@ export function App({ doc }: { doc: BriefDoc }) {
               </div>
               <AltitudeRail level={level} onAscend={ascendTo} />
             </div>
-            <AtlasDetail node={detailNode} />
+            <AtlasDetail node={detailNode} view={view} flows={relatedFlows(view, selectedId)} onSelect={setSelectedId} />
           </div>
           <div className="atlas-bottom">
             <CameraAltitudesTable view={view} onSelect={setSelectedId} />

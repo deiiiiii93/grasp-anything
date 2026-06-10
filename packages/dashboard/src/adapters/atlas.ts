@@ -60,6 +60,8 @@ export interface ArcView {
   id: string;
   continentId: string;
   type: FlowEdgeType;
+  sourceId: string; targetId: string;
+  sourceName: string; targetName: string;
   startLat: number; startLng: number;
   endLat: number; endLng: number;
   color: string;
@@ -118,15 +120,16 @@ export function buildAtlasView(doc: BriefDoc): AtlasView {
 
     // Resolve this continent's flows into great-circle arcs. Endpoints are city or
     // landmark ids within THIS continent (guaranteed by validateBrief; skip if missing).
-    const posById = new Map<string, { lat: number; lng: number }>();
-    for (const c of cities) if (c.continentId === cont.id) posById.set(c.id, { lat: c.lat, lng: c.lng });
-    for (const l of landmarks) if (l.continentId === cont.id) posById.set(l.id, { lat: l.lat, lng: l.lng });
+    const posById = new Map<string, { lat: number; lng: number; name: string }>();
+    for (const c of cities) if (c.continentId === cont.id) posById.set(c.id, { lat: c.lat, lng: c.lng, name: c.name });
+    for (const l of landmarks) if (l.continentId === cont.id) posById.set(l.id, { lat: l.lat, lng: l.lng, name: l.name });
     for (const fl of cont.flows) {
       const s = posById.get(fl.source);
       const t = posById.get(fl.target);
       if (!s || !t) continue;
       arcs.push({
         id: fl.id, continentId: cont.id, type: fl.type, label: fl.label,
+        sourceId: fl.source, targetId: fl.target, sourceName: s.name, targetName: t.name,
         startLat: s.lat, startLng: s.lng, endLat: t.lat, endLng: t.lng, color: geo.color,
       });
     }
@@ -156,6 +159,15 @@ export function selectionContext(view: AtlasView, selectedId: string | null): Se
   const cont = view.continents.find((c) => c.id === selectedId);
   if (cont) return { level: 2, continentId: cont.id, cityId: null, landmarkId: null, lat: cont.lat, lng: cont.lng };
   return { level: 1, ...base };
+}
+
+// Flows touching a selection: the arcs whose endpoints include the selected
+// city/landmark, or every arc of a selected continent.
+export function relatedFlows(view: AtlasView, selectedId: string | null): ArcView[] {
+  if (!selectedId) return [];
+  if (view.continents.some((c) => c.id === selectedId))
+    return view.arcs.filter((a) => a.continentId === selectedId);
+  return view.arcs.filter((a) => a.sourceId === selectedId || a.targetId === selectedId);
 }
 
 // Level-of-detail gate. Cities appear at Continent altitude (2+); landmarks and

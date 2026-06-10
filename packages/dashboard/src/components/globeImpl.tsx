@@ -1,7 +1,21 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Globe, { type GlobeMethods } from "react-globe.gl";
 import type { AtlasView } from "../adapters/atlas";
 import { selectionContext, visibleAt } from "../adapters/atlas";
+
+// Slimmed Natural Earth feature: one property, the continent name.
+interface WorldFeature {
+  type: "Feature";
+  properties: { continent: string };
+  geometry: object;
+}
+
+// #rrggbb → rgba(...). The tint alphas keep the dark earth texture visible.
+function rgba(hex: string, alpha: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+const UNCHARTED = "#5b6470"; // Antarctica & open-ocean territories
 
 export function webglAvailable(): boolean {
   try {
@@ -36,6 +50,26 @@ export function GlobeImpl({
   selRef.current = selectedId;
 
   const ctx = selectionContext(view, selectedId);
+
+  // Tinted continent landmass (Natural Earth, slimmed to { continent }).
+  const [world, setWorld] = useState<WorldFeature[]>([]);
+  useEffect(() => {
+    let alive = true;
+    fetch("./atlas/world.geojson")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${r.status}`))))
+      .then((g: { features: WorldFeature[] }) => { if (alive) setWorld(g.features); })
+      .catch(() => {}); // polygons are decoration; the globe works without them
+    return () => { alive = false; };
+  }, []);
+
+  // continentName ("Asia") → its continent view, for tints and polygon clicks.
+  const contByName = new Map(view.continents.map((c) => [c.continentName, c]));
+  const polygonCap = (f: object) => {
+    const cont = contByName.get((f as WorldFeature).properties.continent);
+    if (!cont) return rgba(UNCHARTED, 0.25);
+    const dim = ctx.level >= 2 && ctx.continentId != null && cont.id !== ctx.continentId;
+    return rgba(cont.color, dim ? 0.08 : 0.42);
+  };
 
   // Level-of-detail: cities at Continent altitude (only the focused continent once
   // we've dived), landmarks at City altitude (only the focused city). Flow arcs ride
@@ -117,6 +151,15 @@ export function GlobeImpl({
         globeImageUrl="./earth-dark.jpg"
         atmosphereColor="#5aa9f0"
         atmosphereAltitude={0.18}
+        polygonsData={world}
+        polygonCapColor={polygonCap}
+        polygonSideColor={() => "rgba(0,0,0,0)"}
+        polygonStrokeColor={() => "rgba(255,255,255,0.18)"}
+        polygonAltitude={0.005}
+        onPolygonClick={(f) => {
+          const cont = contByName.get((f as WorldFeature).properties.continent);
+          if (cont) onSelect(cont.id);
+        }}
         pointsData={points}
         pointLat="lat"
         pointLng="lng"

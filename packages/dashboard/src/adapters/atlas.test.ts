@@ -1,4 +1,4 @@
-import { buildAtlasView, CONTINENT_GEO, DOMAIN_STORY } from "./atlas";
+import { buildAtlasView, CONTINENT_GEO, DOMAIN_STORY, relatedFlows } from "./atlas";
 import { sampleDoc } from "../test-utils/sample";
 
 describe("buildAtlasView", () => {
@@ -56,5 +56,20 @@ describe("buildAtlasView", () => {
     expect(view.arcs.length).toBe(6);
     const contByArc = new Set(view.arcs.map((a) => a.continentId));
     expect(contByArc).toEqual(new Set(["c_wf", "c_biz"]));
+  });
+
+  it("arcs carry endpoint ids and human names", () => {
+    const view = buildAtlasView(sampleDoc);
+    const arc = view.arcs.find((a) => a.id === "f_wf1")!;
+    expect(arc).toMatchObject({ sourceId: "lm_wizard", targetId: "lm_dispatch" });
+    expect(arc.sourceName).toBe("Depth wizard");
+    expect(arc.targetName).toBe("Parallel dispatch");
+  });
+
+  it("relatedFlows returns arcs touching a landmark, and all arcs of a continent", () => {
+    const view = buildAtlasView(sampleDoc);
+    expect(relatedFlows(view, "lm_dispatch").map((a) => a.id).sort()).toEqual(["f_wf1", "f_wf2"]);
+    expect(relatedFlows(view, "c_biz").length).toBe(3);
+    expect(relatedFlows(view, null)).toEqual([]);
   });
 });
