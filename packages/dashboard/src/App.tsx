@@ -1,7 +1,9 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import type { BriefDoc } from "@grasp/schema";
 import { buildCards, buildSignals } from "./adapters/brief";
-import { buildAtlasView, selectionContext } from "./adapters/atlas";
+import { buildAtlasView, relatedFlows, selectionContext } from "./adapters/atlas";
+import { buildVoyage } from "./adapters/voyage";
+import { VoyageOverlay } from "./components/VoyageOverlay";
 import { Header } from "./components/Header";
 import { BriefCard } from "./components/BriefCard";
 import { LandscapeGraph } from "./components/LandscapeGraph";
@@ -11,17 +13,32 @@ import { AtlasIntro } from "./components/AtlasIntro";
 import { AltitudeRail } from "./components/AltitudeRail";
 import { HowItWorks } from "./components/HowItWorks";
 import { CameraAltitudesTable } from "./components/CameraAltitudesTable";
+import { AtlasListPanel } from "./components/AtlasListPanel";
+import { ExportMenu } from "./components/ExportMenu";
+import { useFullscreen } from "./components/useFullscreen";
 
 const AtlasGlobe = lazy(() => import("./components/AtlasGlobe"));
 
 type Tab = "strategic" | "atlas" | "landscape" | "evidence";
+type Theme = "dark" | "light";
+
+// Saved preference wins; otherwise follow the OS. Storage can be unavailable
+// (file://, privacy modes) — fall back silently.
+function initialTheme(): Theme {
+  try {
+    const saved = localStorage.getItem("grasp-theme");
+    if (saved === "light" || saved === "dark") return saved;
+    if (typeof window.matchMedia === "function" && window.matchMedia("(prefers-color-scheme: light)").matches) return "light";
+  } catch { /* default below */ }
+  return "dark";
+}
 
 const GUARANTEES = [
-  ["Accessible", "Use List view for screen readers and keyboard navigation."],
-  ["Export ready", "The atlas exports as a structured outline + Mermaid flows."],
-  ["Secure by default", "All items and links are escaped; only safe links open."],
-  ["Deterministic layout", "Continents and landmarks are placed reproducibly."],
-  ["Fallback", "If WebGL is unavailable, the outline is shown."],
+  ["♿", "Accessible", "Use List view for screen readers and keyboard navigation."],
+  ["📤", "Export ready", "Use the Export menu (top right): Markdown report, print-to-PDF HTML, raw JSON."],
+  ["🔒", "Secure by default", "All items and links are escaped; only safe links open."],
+  ["🎯", "Deterministic layout", "Continents and landmarks are placed reproducibly."],
+  ["🧭", "Fallback", "If WebGL is unavailable, the outline is shown."],
 ] as const;
 
 export function App({ doc }: { doc: BriefDoc }) {
@@ -31,6 +48,15 @@ export function App({ doc }: { doc: BriefDoc }) {
   const [tab, setTab] = useState<Tab>("atlas");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [listView, setListView] = useState(false);
+  const [voyaging, setVoyaging] = useState(false);
+  const voyage = useMemo(() => buildVoyage(view), [view]);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const fullscreen = useFullscreen(stageRef);
+  const [theme, setTheme] = useState<Theme>(initialTheme);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem("grasp-theme", theme); } catch { /* storage unavailable */ }
+  }, [theme]);
 
   const ctx = useMemo(() => selectionContext(view, selectedId), [view, selectedId]);
   const detailNode: DetailNode = useMemo(() => {
@@ -61,13 +87,26 @@ export function App({ doc }: { doc: BriefDoc }) {
   return (
     <main className="app">
       <Header signals={signals} />
-      <nav className="top-nav" role="tablist">
-        {(["strategic", "atlas", "landscape", "evidence"] as Tab[]).map((t) => (
-          <button key={t} type="button" role="tab" aria-selected={tab === t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
-            {t === "strategic" ? "Strategic" : t === "atlas" ? "Atlas" : t === "landscape" ? "Landscape" : "Evidence"}
+      <div className="nav-row">
+        <nav className="top-nav" role="tablist">
+          {(["strategic", "atlas", "landscape", "evidence"] as Tab[]).map((t) => (
+            <button key={t} type="button" role="tab" aria-selected={tab === t} className={tab === t ? "active" : ""} onClick={() => setTab(t)}>
+              {t === "strategic" ? "Strategic" : t === "atlas" ? "Atlas" : t === "landscape" ? "Landscape" : "Evidence"}
+            </button>
+          ))}
+        </nav>
+        <div className="nav-actions">
+          <ExportMenu doc={doc} />
+          <button
+            type="button"
+            className="theme-toggle"
+            aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+          >
+            {theme === "dark" ? "☀️" : "🌙"}
           </button>
-        ))}
-      </nav>
+        </div>
+      </div>
 
       {tab === "strategic" && (
         <section className="cards-grid">
@@ -84,25 +123,51 @@ export function App({ doc }: { doc: BriefDoc }) {
             <div className="atlas-center">
               <div className="atlas-crumb-row">
                 <span className="atlas-breadcrumb" data-testid="atlas-breadcrumb">{crumb.join(" › ")}</span>
+                <button type="button" className="voyage-toggle" aria-pressed={voyaging} onClick={() => setVoyaging((v) => !v)}>
+                  {voyaging ? "✕ End voyage" : "▶ Voyage"}
+                </button>
                 <button type="button" className="list-view-toggle" aria-pressed={listView} onClick={() => setListView((v) => !v)}>List view</button>
               </div>
-              {listView ? (
-                <AtlasOutline view={view} selectedId={selectedId} onSelect={setSelectedId} />
-              ) : (
-                <Suspense fallback={<div className="atlas-globe" data-testid="atlas-globe-loading">Loading globe…</div>}>
-                  <AtlasGlobe view={view} selectedId={selectedId} onSelect={setSelectedId} />
-                </Suspense>
-              )}
+              <div className={`atlas-stage${fullscreen.active ? " stage-fullscreen" : ""}`} ref={stageRef} data-testid="atlas-stage">
+                {listView ? (
+                  <AtlasOutline view={view} selectedId={selectedId} onSelect={setSelectedId} />
+                ) : (
+                  <Suspense fallback={<div className="atlas-globe" data-testid="atlas-globe-loading">Loading globe…</div>}>
+                    <AtlasGlobe view={view} selectedId={selectedId} onSelect={setSelectedId} />
+                  </Suspense>
+                )}
+                {voyaging && (
+                  <VoyageOverlay stops={voyage} onNavigate={setSelectedId} onExit={() => setVoyaging(false)} />
+                )}
+                {/* Fullscreen renders only the stage subtree, so the voyage
+                    control and the detail card float over the globe here. */}
+                {fullscreen.active && (
+                  <>
+                    <button type="button" className="voyage-toggle stage-voyage" aria-pressed={voyaging} onClick={() => setVoyaging((v) => !v)}>
+                      {voyaging ? "✕ End voyage" : "▶ Voyage"}
+                    </button>
+                    <div className="stage-detail">
+                      <AtlasDetail node={detailNode} view={view} flows={relatedFlows(view, selectedId)} onSelect={setSelectedId} />
+                    </div>
+                  </>
+                )}
+                <button
+                  type="button"
+                  className="fullscreen-toggle"
+                  aria-label={fullscreen.active ? "Exit full screen" : "Full screen"}
+                  title={fullscreen.active ? "Exit full screen (Esc)" : "Full screen"}
+                  onClick={fullscreen.toggle}
+                >
+                  {fullscreen.active ? "🗗" : "⛶"}
+                </button>
+              </div>
               <AltitudeRail level={level} onAscend={ascendTo} />
             </div>
-            <AtlasDetail node={detailNode} />
+            <AtlasDetail node={detailNode} view={view} flows={relatedFlows(view, selectedId)} onSelect={setSelectedId} />
           </div>
           <div className="atlas-bottom">
             <CameraAltitudesTable view={view} onSelect={setSelectedId} />
-            <div className="atlas-listview-panel">
-              <h3>List view (outline)</h3>
-              <AtlasOutline view={view} selectedId={selectedId} onSelect={setSelectedId} />
-            </div>
+            <AtlasListPanel view={view} selectedId={selectedId} onSelect={setSelectedId} />
           </div>
           <HowItWorks view={view} />
         </>
@@ -128,9 +193,9 @@ export function App({ doc }: { doc: BriefDoc }) {
       )}
 
       <footer className="atlas-guarantees">
-        {GUARANTEES.map(([t, d]) => (
+        {GUARANTEES.map(([icon, t, d]) => (
           <div key={t} className="guarantee">
-            <span className="guarantee-title">{t}</span>
+            <span className="guarantee-title"><span className="guarantee-icon" aria-hidden="true">{icon}</span> {t}</span>
             <span className="guarantee-desc">{d}</span>
           </div>
         ))}

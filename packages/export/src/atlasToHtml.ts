@@ -1,5 +1,5 @@
 import type { BriefDoc } from "@grasp/schema";
-import { CONTINENT_GEO } from "@grasp/dashboard/adapters";
+import { CONTINENT_GEO, DOMAIN_STORY } from "@grasp/dashboard/adapters";
 
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -9,7 +9,7 @@ export function atlasToHtml(doc: BriefDoc): string {
   const parts: string[] = [`<section class="atlas"><h2>How it works</h2>`];
   for (const c of doc.atlas.continents) {
     const continentName = CONTINENT_GEO[c.domain].continentName;
-    parts.push(`<article><h3>${esc(c.title)} <span class="continent">${esc(continentName)}</span></h3><p>${esc(c.summary)}</p>`);
+    parts.push(`<article><h3>${esc(c.title)} <span class="continent">${esc(continentName)}</span></h3><p class="epigraph"><em>“${esc(DOMAIN_STORY[c.domain].concept)}”</em></p><p>${esc(c.summary)}</p>`);
     for (const city of c.cities) {
       parts.push(`<h4>${esc(city.name)}</h4><ul>`);
       for (const lm of city.landmarks) {

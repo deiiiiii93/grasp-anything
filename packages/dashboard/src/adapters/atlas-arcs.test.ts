@@ -50,7 +50,44 @@ describe("buildAtlasView flow arcs", () => {
       { id: "f3", source: "nope", target: "city_b", type: "calls" },
     ] as never;
     const v = buildAtlasView(d);
-    expect(v.arcs.map((a) => a.id)).toEqual(["f2"]); // f3 dropped (unresolved endpoint)
+    const flows = v.arcs.filter((a) => a.kind === "flow");
+    expect(flows.map((a) => a.id)).toEqual(["f2"]); // f3 dropped (unresolved endpoint)
+  });
+
+  it("emits a hierarchy spoke from each city to each of its landmarks", () => {
+    const d = docWithFlow();
+    d.atlas.continents[0].cities[0].landmarks = [{ id: "lm_x", name: "X", evidenceIds: [], tags: [] }] as never;
+    const v = buildAtlasView(d);
+    const spokes = v.arcs.filter((a) => a.kind === "spoke");
+    expect(spokes).toHaveLength(1);
+    const city = v.cities.find((c) => c.id === "city_a")!;
+    const lm = v.landmarks.find((l) => l.id === "lm_x")!;
+    expect(spokes[0]).toMatchObject({
+      sourceId: "city_a", targetId: "lm_x",
+      startLat: city.lat, startLng: city.lng, endLat: lm.lat, endLng: lm.lng,
+    });
+  });
+
+  it("docks cities at real anchor cities of their continent", () => {
+    const v = buildAtlasView(docWithFlow());
+    const a = v.cities.find((c) => c.id === "city_a")!;
+    const b = v.cities.find((c) => c.id === "city_b")!;
+    // workflows → North America anchors, in order: New York, San Francisco.
+    expect(a).toMatchObject({ anchorName: "New York", lat: 40.7, lng: -74.0 });
+    expect(b).toMatchObject({ anchorName: "San Francisco", lat: 37.8, lng: -122.4 });
+  });
+
+  it("keeps landmarks within a few degrees of their city", () => {
+    const d = docWithFlow();
+    d.atlas.continents[0].cities[0].landmarks = [
+      { id: "lm_1", name: "A", evidenceIds: [], tags: [] },
+      { id: "lm_2", name: "B", evidenceIds: [], tags: [] },
+    ] as never;
+    const v = buildAtlasView(d);
+    const city = v.cities.find((c) => c.id === "city_a")!;
+    for (const lm of v.landmarks) {
+      expect(Math.hypot(lm.lat - city.lat, lm.lng - city.lng)).toBeLessThanOrEqual(4);
+    }
   });
 });
 

@@ -35,4 +35,57 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("tab", { name: "Landscape" }));
     expect(screen.getByTestId("landscape-graph")).toBeInTheDocument();
   });
+
+  it("toggles fullscreen on the globe stage (CSS fallback in jsdom) and exits on Esc", () => {
+    render(<App doc={sampleDoc} />);
+    const stage = screen.getByTestId("atlas-stage");
+    expect(stage.className).not.toContain("stage-fullscreen");
+    fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
+    expect(stage.className).toContain("stage-fullscreen");
+    expect(screen.getByRole("button", { name: "Exit full screen" })).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(stage.className).not.toContain("stage-fullscreen");
+  });
+
+  it("floats the voyage control and the detail card on the stage in fullscreen", () => {
+    render(<App doc={sampleDoc} />);
+    const stage = screen.getByTestId("atlas-stage");
+    // Not fullscreen: no in-stage voyage button or detail card.
+    expect(within(stage).queryByRole("button", { name: "▶ Voyage" })).not.toBeInTheDocument();
+    expect(within(stage).queryByTestId("atlas-detail")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
+    const detail = within(stage).getByTestId("atlas-detail");
+    expect(detail).toBeInTheDocument();
+    fireEvent.click(within(stage).getByRole("button", { name: "▶ Voyage" }));
+    expect(within(stage).getByTestId("voyage-overlay")).toBeInTheDocument();
+    // The detail card mirrors the voyage's first navigation once it advances.
+    fireEvent.click(within(stage).getByLabelText("Next stop"));
+    expect(within(detail).getByRole("heading")).toHaveTextContent("Architecture");
+  });
+
+  it("uses the native Fullscreen API when the stage supports it", () => {
+    const request = vi.fn().mockResolvedValue(undefined);
+    (HTMLDivElement.prototype as unknown as { requestFullscreen: () => Promise<void> }).requestFullscreen = request;
+    try {
+      render(<App doc={sampleDoc} />);
+      fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
+      expect(request).toHaveBeenCalled();
+      // Native path: no CSS fallback class.
+      expect(screen.getByTestId("atlas-stage").className).not.toContain("stage-fullscreen");
+    } finally {
+      delete (HTMLDivElement.prototype as unknown as { requestFullscreen?: unknown }).requestFullscreen;
+    }
+  });
+
+  it("toggles light/dark theme on <html> and persists it", () => {
+    localStorage.removeItem("grasp-theme");
+    render(<App doc={sampleDoc} />);
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    fireEvent.click(screen.getByRole("button", { name: /switch to light theme/i }));
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(localStorage.getItem("grasp-theme")).toBe("light");
+    fireEvent.click(screen.getByRole("button", { name: /switch to dark theme/i }));
+    expect(document.documentElement.dataset.theme).toBe("dark");
+  });
 });

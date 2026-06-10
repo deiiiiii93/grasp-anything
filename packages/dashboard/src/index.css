@@ -1,10 +1,16 @@
 :root {
-  --bg: #0f1115;
-  --panel: #181b22;
-  --text: #e6e8ec;
-  --muted: #9aa3b2;
-  --border: #2a2f3a;
+  /* Dark (default) — deep navy, calm contrast. */
+  --bg: #0a0e1a;
+  --bg-image: radial-gradient(1200px 700px at 70% -10%, #141d33 0%, var(--bg) 55%);
+  --panel: #111726;
+  --panel-2: #0d1320;
+  --canvas: #0c1120;
+  --text: #f2f4f8;
+  --muted: #93a0b6;
+  --border: #232c42;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   --accent: #f5c451;
+  --accent-contrast: #0a0e1a;
   --idea: #f5c451;
   --problem: #e5687a;
   --why: #5bd1a0;
@@ -12,13 +18,44 @@
   --takeaway: #b794f6;
   --verified: #5bd1a0;
   --inferred: #c9a14a;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  /* Light — Apple-gray surfaces, ink text, deeper amber accent for contrast. */
+  --bg: #f5f5f7;
+  --bg-image: none;
+  --panel: #ffffff;
+  --panel-2: #f0f0f3;
+  --canvas: #e9ebf0;
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --border: #d8d8de;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+  --accent: #b27409;
+  --accent-contrast: #ffffff;
+  --problem: #d2455c;
+  --why: #1e9e6e;
+  --how: #0071e3;
+  --takeaway: #8e5fd6;
+  --verified: #1e9e6e;
+  --inferred: #9a7b1c;
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); }
+body {
+  margin: 0; color: var(--text);
+  background: var(--bg);
+  background-image: var(--bg-image);
+  background-attachment: fixed;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
 
-.app { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; }
+/* Full-bleed shell: the page uses the whole browser width. */
+.app { max-width: none; margin: 0; padding: 28px clamp(20px, 3.5vw, 56px) 64px; }
 
 .app-header { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 28px; }
 .app-title a, .app-title span { font-size: 28px; font-weight: 700; color: var(--text); text-decoration: none; }
@@ -33,7 +70,7 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
 .brief-card {
   background: var(--panel); border: 1px solid var(--border);
-  border-left: 4px solid var(--border); border-radius: 10px; padding: 16px 18px;
+  border-left: 4px solid var(--border); border-radius: 14px; padding: 16px 18px;
 }
 .card-idea { border-left-color: var(--idea); }
 .card-problem { border-left-color: var(--problem); }
@@ -59,17 +96,17 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .graph-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
 .graph-tabs button {
   background: var(--panel); color: var(--muted); border: 1px solid var(--border);
-  border-radius: 8px; padding: 6px 14px; font-size: 14px; cursor: pointer;
+  border-radius: 999px; padding: 6px 14px; font-size: 14px; cursor: pointer;
 }
 .graph-tabs button.active { color: var(--text); border-color: var(--accent); }
 
 .graph-view {
   display: grid; grid-template-columns: 1fr 280px; gap: 16px;
-  background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 12px;
 }
 .graph-canvas { position: relative; min-width: 0; }
 .graph-svg {
-  width: 100%; height: auto; background: #0c0e12; border-radius: 8px;
+  width: 100%; height: auto; background: var(--canvas); border-radius: 10px;
   cursor: grab; touch-action: none;
 }
 .graph-svg:active { cursor: grabbing; }
@@ -78,18 +115,18 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .graph-edge.dim { opacity: 0.08; }
 .graph-edge-label {
   fill: var(--muted); font-size: 10px; text-anchor: middle; pointer-events: none;
-  paint-order: stroke; stroke: #0c0e12; stroke-width: 3px;
+  paint-order: stroke; stroke: var(--canvas); stroke-width: 3px;
 }
 .graph-node { cursor: grab; transition: opacity 0.15s; }
 .graph-node:active { cursor: grabbing; }
 .graph-node.dim { opacity: 0.2; }
-.graph-node circle { stroke: #0c0e12; stroke-width: 2; transition: r 0.1s; }
+.graph-node circle { stroke: var(--canvas); stroke-width: 2; transition: r 0.1s; }
 .graph-node.selected circle { stroke: var(--text); stroke-width: 3; }
 .graph-node:focus { outline: none; }
 .graph-node:focus-visible circle { stroke: var(--accent); stroke-width: 3; }
 .graph-node-label {
   fill: var(--text); font-size: 11px; pointer-events: none;
-  paint-order: stroke; stroke: #0c0e12; stroke-width: 3px;
+  paint-order: stroke; stroke: var(--canvas); stroke-width: 3px;
 }
 .graph-controls { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; }
 .graph-controls button {
@@ -111,29 +148,62 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .graph-legend li { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
 .legend-swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
 
-/* ─── Top navigation ──────────────────────────────────────────────── */
+/* ─── Top navigation (Apple segmented control + theme switch) ─────── */
+.nav-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 28px; }
 .top-nav {
-  display: flex; gap: 4px; border-bottom: 1px solid var(--border);
-  margin-bottom: 28px; padding-bottom: 0;
+  display: inline-flex; gap: 2px; padding: 3px;
+  background: var(--panel-2); border: 1px solid var(--border); border-radius: 12px;
 }
 .top-nav button {
   background: transparent; color: var(--muted); border: none;
-  border-bottom: 2px solid transparent; border-radius: 0;
-  padding: 10px 18px; font-size: 15px; font-weight: 500; cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
+  border-radius: 9px; padding: 7px 20px; font-size: 14px; font-weight: 500; cursor: pointer;
+  transition: color 0.15s, background 0.15s, box-shadow 0.15s;
 }
 .top-nav button:hover { color: var(--text); }
-.top-nav button.active { color: var(--text); border-bottom-color: var(--accent); }
+.top-nav button.active { color: var(--text); background: var(--panel); box-shadow: var(--shadow); }
+.nav-actions { display: flex; align-items: center; gap: 8px; }
+.theme-toggle {
+  background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px;
+  width: 36px; height: 36px; font-size: 16px; line-height: 1; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.theme-toggle:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+
+/* ─── Export menu ─────────────────────────────────────────────────── */
+.export-menu { position: relative; }
+.export-toggle {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 999px; padding: 7px 18px; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s;
+}
+.export-toggle:hover, .export-toggle[aria-expanded="true"] { border-color: var(--accent); box-shadow: var(--shadow); }
+.export-backdrop { position: fixed; inset: 0; z-index: 19; }
+.export-dropdown {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 20;
+  list-style: none; margin: 0; padding: 6px; min-width: 280px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+}
+.export-dropdown button {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
+  width: 100%; text-align: left; background: none; border: none;
+  border-radius: 9px; padding: 8px 12px; cursor: pointer; color: var(--text);
+}
+.export-dropdown button:hover { background: var(--panel-2); }
+.export-item-label { font-size: 13px; font-weight: 500; }
+.export-item-hint { font-size: 11px; color: var(--muted); }
 
 /* ─── Atlas grid (3 columns: intro | center | detail) ─────────────── */
+/* The globe track absorbs all spare width; the rails stay reading-width. */
 .atlas-grid {
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr) 300px;
+  grid-template-columns: clamp(200px, 16vw, 264px) minmax(0, 1fr) clamp(280px, 21vw, 348px);
   gap: 20px;
   align-items: start;
   margin-bottom: 28px;
 }
-@media (max-width: 900px) {
+@media (max-width: 980px) {
   .atlas-grid { grid-template-columns: 1fr; }
 }
 
@@ -149,15 +219,15 @@ body { margin: 0; background: var(--bg); color: var(--text); }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .list-view-toggle {
-  background: var(--panel); color: var(--muted); border: 1px solid var(--border);
-  border-radius: 6px; padding: 4px 12px; font-size: 13px; cursor: pointer;
+  background: var(--panel-2); color: var(--muted); border: 1px solid var(--border);
+  border-radius: 999px; padding: 6px 16px; font-size: 13px; cursor: pointer;
   white-space: nowrap;
 }
 .list-view-toggle[aria-pressed="true"] { color: var(--text); border-color: var(--accent); }
 .list-view-toggle:hover { color: var(--text); }
 
 /* ─── Atlas globe ─────────────────────────────────────────────────── */
-.atlas-globe { width: 100%; overflow: hidden; border-radius: 10px; background: #0c0e12; }
+.atlas-globe { width: 100%; overflow: hidden; border-radius: 14px; background: #0b1020; }
 
 /* ─── Atlas globe fallback / outline ─────────────────────────────── */
 .atlas-globe-fallback { padding: 8px 0; }
@@ -174,27 +244,46 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .outline-node.selected { background: var(--panel); color: var(--accent); }
 .outline-kind { font-size: 10px; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
 
-/* ─── Altitude rail ───────────────────────────────────────────────── */
+/* ─── Altitude rail (stepper with arrows, per the mockup) ─────────── */
 .altitude-rail {
-  display: flex; list-style: none; padding: 0; margin: 12px 0 0;
-  gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  display: flex; list-style: none; padding: 8px; margin: 12px 0 0;
+  gap: 0; border: 1px solid var(--border); border-radius: 12px;
+  background: var(--panel-2); align-items: stretch;
 }
 .altitude-rail li {
-  flex: 1; display: flex; flex-direction: column; align-items: center;
-  padding: 8px 4px; gap: 2px; border-right: 1px solid var(--border);
-  font-size: 12px; color: var(--muted);
-  transition: background 0.15s, color 0.15s;
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  position: relative; padding: 6px 14px 6px 8px; font-size: 12px; color: var(--muted);
+  border-radius: 8px; transition: background 0.15s, color 0.15s;
 }
-.altitude-rail li:last-child { border-right: none; }
-.altitude-rail li.active { background: var(--panel); color: var(--text); }
-.rail-n { font-size: 16px; font-weight: 700; line-height: 1; }
-.rail-label { font-weight: 600; font-size: 12px; }
+.altitude-rail li:not(:last-child)::after {
+  content: "→"; position: absolute; right: -7px; top: 50%; transform: translateY(-50%);
+  color: var(--border); font-size: 14px; z-index: 1;
+}
+.altitude-rail li.active {
+  background: var(--panel); color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--accent), 0 0 14px rgba(245, 196, 81, 0.12);
+}
+.rail-step-btn {
+  display: flex; align-items: center; gap: 8px; background: none; border: none;
+  color: inherit; cursor: pointer; padding: 0; font: inherit;
+}
+.rail-step-btn:hover { color: var(--text); }
+.altitude-rail li > .rail-icon, .altitude-rail li > .rail-text { margin: 0 4px; }
+.rail-icon { font-size: 18px; line-height: 1; filter: saturate(0.8); }
+.rail-text { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+.rail-n {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 50%; background: var(--border);
+  color: var(--text); font-size: 10px; font-weight: 700; margin-right: 2px;
+}
+.altitude-rail li.active .rail-n { background: var(--accent); color: var(--accent-contrast); }
+.rail-label { font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; }
 .rail-caption { font-size: 10px; color: var(--muted); }
 
 /* ─── Atlas intro (left column) ───────────────────────────────────── */
 .atlas-intro {
   background: var(--panel); border: 1px solid var(--border);
-  border-radius: 10px; padding: 18px 16px;
+  border-radius: 14px; padding: 18px 16px;
 }
 .atlas-intro h2 { font-size: 18px; margin: 0 0 6px; }
 .atlas-intro-h { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 14px 0 8px; }
@@ -216,7 +305,7 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 /* ─── Atlas detail (right column) ────────────────────────────────── */
 .atlas-detail {
   background: var(--panel); border: 1px solid var(--border);
-  border-radius: 10px; padding: 18px 16px;
+  border-radius: 14px; padding: 18px 16px;
 }
 .atlas-detail-empty { font-size: 13px; color: var(--muted); margin: 0; }
 .atlas-detail-kind {
@@ -240,15 +329,15 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 
 /* ─── Atlas bottom (2 columns) ────────────────────────────────────── */
 .atlas-bottom {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; align-items: start;
 }
-.atlas-listview-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.atlas-listview-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
 .atlas-listview-panel h3 { font-size: 14px; margin: 0 0 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 
 /* ─── Camera altitudes table ──────────────────────────────────────── */
 .camera-altitudes {
   background: var(--panel); border: 1px solid var(--border);
-  border-radius: 10px; padding: 16px;
+  border-radius: 14px; padding: 16px;
 }
 .camera-altitudes h3 { font-size: 14px; margin: 0 0 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .camera-altitudes table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -265,7 +354,7 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .how-it-works h2 { font-size: 18px; margin: 0 0 18px; }
 .how-domain {
   background: var(--panel); border: 1px solid var(--border);
-  border-radius: 10px; padding: 16px 18px; margin-bottom: 14px;
+  border-radius: 14px; padding: 16px 18px; margin-bottom: 14px;
 }
 .how-domain h3 { font-size: 16px; margin: 0 0 6px; }
 .how-continent { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 6px; }
@@ -285,6 +374,215 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .phase-badges span {
   font-size: 11px; background: var(--panel); border: 1px solid var(--border);
   border-radius: 4px; padding: 2px 8px; color: var(--muted);
+}
+
+/* ─── Atlas stage (globe + overlays share one box) ────────────────── */
+.atlas-stage { position: relative; min-width: 0; }
+.atlas-globe { position: relative; }
+
+/* Fullscreen: native (:fullscreen) and the CSS fallback share styling.
+   The toggle is an on-globe overlay → fixed dark-glass palette (both themes). */
+.fullscreen-toggle {
+  position: absolute; top: 12px; right: 12px; z-index: 6;
+  width: 36px; height: 36px; border-radius: 999px;
+  background: rgba(10, 14, 26, 0.72); border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #e8ecf4; font-size: 15px; line-height: 1; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  backdrop-filter: saturate(160%) blur(10px);
+  transition: border-color 0.15s;
+}
+.fullscreen-toggle:hover { border-color: #f5c451; }
+.atlas-stage:fullscreen {
+  background: var(--bg); padding: 12px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.stage-fullscreen {
+  position: fixed; inset: 0; z-index: 50;
+  background: var(--bg); padding: 12px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+/* Fullscreen-only chrome: the voyage control top-center, the detail card
+   floating on the right (under the fullscreen toggle), scrollable when long. */
+.stage-voyage { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 6; }
+.stage-detail {
+  position: absolute; top: 60px; right: 12px; z-index: 6;
+  width: min(360px, 38vw); max-height: calc(100% - 84px); overflow-y: auto;
+  border-radius: 14px;
+}
+.stage-detail .atlas-detail {
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
+  backdrop-filter: saturate(160%) blur(12px);
+}
+
+/* ─── Altitude badge (top-left chip over the globe) ───────────────── */
+.altitude-badge {
+  position: absolute; top: 12px; left: 12px; z-index: 4;
+  display: flex; flex-direction: column; gap: 1px;
+  background: rgba(10, 14, 26, 0.72); border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px; padding: 6px 12px; pointer-events: none;
+  backdrop-filter: saturate(160%) blur(10px);
+}
+/* On-globe overlays keep a fixed dark-glass palette in BOTH themes — the
+   globe is always a dark "space" surface (cf. Apple Maps satellite). */
+.altitude-badge-level {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  color: #f5c451;
+}
+.altitude-badge-caption { font-size: 11px; color: #b9c2d4; }
+
+/* ─── Voyage (the guided trip) ────────────────────────────────────── */
+.voyage-toggle {
+  background: var(--accent); color: var(--accent-contrast);
+  border: none; border-radius: 999px; padding: 6px 16px;
+  font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  transition: filter 0.15s, box-shadow 0.15s;
+}
+.voyage-toggle:hover { filter: brightness(1.06); box-shadow: 0 0 12px rgba(245, 196, 81, 0.3); }
+.voyage-overlay {
+  position: absolute; inset: 0; z-index: 5; display: flex;
+  align-items: flex-end; justify-content: center; padding: 18px;
+  pointer-events: none;
+}
+.voyage-card {
+  pointer-events: auto; max-width: 520px; width: 100%;
+  background: rgba(13, 19, 32, 0.88); border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px; padding: 16px 18px; backdrop-filter: saturate(160%) blur(14px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  color: #f0f2f7;
+}
+.voyage-chapter {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  color: #f5c451;
+}
+.voyage-title { margin: 4px 0 2px; font-size: 18px; }
+.voyage-subtitle { margin: 0 0 6px; font-size: 12px; color: #aeb6c6; }
+.voyage-concept {
+  margin: 8px 0; padding-left: 10px; border-left: 3px solid #f5c451;
+  font-style: italic; font-size: 14px; color: #f0f2f7;
+}
+.voyage-body { margin: 6px 0 12px; font-size: 13px; line-height: 1.55; color: #aeb6c6; }
+.voyage-controls { display: flex; gap: 8px; }
+.voyage-controls button {
+  background: rgba(255, 255, 255, 0.08); color: #f0f2f7; border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px; padding: 4px 14px; font-size: 12px; cursor: pointer;
+}
+.voyage-controls button:disabled { opacity: 0.4; cursor: default; }
+.voyage-controls button:not(:disabled):hover { border-color: #f5c451; }
+.voyage-exit { margin-left: auto; }
+.voyage-progress { display: flex; gap: 5px; margin-top: 12px; }
+.voyage-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, 0.22);
+  transition: background 0.2s, transform 0.2s;
+}
+.voyage-dot.active { background: #f5c451; transform: scale(1.4); }
+
+/* ─── Story card (continent detail) ───────────────────────────────── */
+.atlas-story-card {
+  display: flex; gap: 12px; align-items: flex-start; margin: 0 0 12px;
+  background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px;
+}
+.atlas-story-art { width: 72px; height: auto; flex-shrink: 0; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
+.atlas-story-card figcaption { min-width: 0; }
+.atlas-story-concept {
+  margin: 0 0 6px; padding-left: 8px; border-left: 3px solid var(--accent);
+  font-style: italic; font-size: 13px; line-height: 1.45;
+}
+.atlas-story-lesson { margin: 0 0 6px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+.atlas-story-motif { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+
+/* ─── Detail panel: sections, flows, child lists ──────────────────── */
+.atlas-section-label {
+  display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--muted); margin-bottom: 6px;
+}
+.atlas-related-flows { margin: 12px 0; }
+.atlas-related-flows ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.flow-chip {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px;
+  padding: 5px 9px; font-size: 12px;
+}
+.flow-endpoints { color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.flow-type {
+  flex-shrink: 0; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--accent); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px;
+}
+.atlas-child-list { margin: 12px 0; }
+.atlas-child-list ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.atlas-child-list button {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 999px; padding: 3px 11px; font-size: 12px; cursor: pointer;
+}
+.atlas-child-list button:hover { border-color: var(--accent); }
+
+/* ─── Intro: per-domain concept line ──────────────────────────────── */
+.domain-concept {
+  font-size: 11px; font-style: italic; color: var(--muted); opacity: 0.85;
+  flex-basis: 100%; padding-left: 16px;
+}
+
+/* ─── List panel: tabs, search, mini card ─────────────────────────── */
+.list-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.list-panel-head h3 { margin: 0; }
+.list-panel-tabs { display: flex; gap: 4px; }
+.list-panel-tabs button {
+  background: var(--panel-2); color: var(--muted); border: 1px solid var(--border);
+  border-radius: 999px; padding: 3px 12px; font-size: 12px; cursor: pointer;
+}
+.list-panel-tabs button.active { color: var(--text); border-color: var(--accent); }
+.atlas-search input {
+  width: 100%; background: var(--panel-2); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text); padding: 7px 10px; font-size: 13px;
+  margin-bottom: 8px;
+}
+.atlas-search input:focus { outline: none; border-color: var(--accent); }
+.atlas-search-hits { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; max-height: 260px; overflow-y: auto; }
+.atlas-search-hits button {
+  display: flex; align-items: baseline; gap: 6px; width: 100%; text-align: left;
+  background: none; border: none; color: var(--text); padding: 4px 6px;
+  border-radius: 5px; font-size: 13px; cursor: pointer;
+}
+.atlas-search-hits button:hover { background: var(--panel-2); }
+.hit-context { margin-left: auto; font-size: 11px; color: var(--muted); flex-shrink: 0; }
+.no-hits { font-size: 12px; color: var(--muted); padding: 4px 6px; }
+.atlas-mini-card {
+  margin-top: 12px; background: var(--panel-2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px; font-size: 13px;
+}
+.atlas-mini-card p { margin: 6px 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+.mini-evidence { font-size: 11px; color: var(--accent); }
+
+/* ─── Camera altitudes: expansion controls ────────────────────────── */
+.camera-altitudes-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.camera-altitudes-head h3 { margin: 0; }
+.open-all {
+  background: var(--panel-2); color: var(--muted); border: 1px solid var(--border);
+  border-radius: 999px; padding: 3px 12px; font-size: 12px; cursor: pointer;
+}
+.open-all:hover { color: var(--text); border-color: var(--accent); }
+.camera-altitudes tr { cursor: default; }
+.row-expand {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-size: 11px; padding: 2px 6px 2px 0;
+}
+.row-title {
+  background: none; border: none; color: var(--text); cursor: pointer;
+  font-size: 13px; padding: 0; text-align: left;
+}
+.row-title:hover { color: var(--accent); }
+.row-title.city { padding-left: 26px; color: var(--muted); }
+.row-title.city:hover { color: var(--accent); }
+.city-row td { padding: 5px 6px; }
+
+/* ─── How it works: chapters ──────────────────────────────────────── */
+.how-chapter {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); margin-right: 8px;
+}
+.how-concept {
+  margin: 0 0 8px; padding-left: 10px; border-left: 3px solid var(--border);
+  font-style: italic; font-size: 13px; color: var(--muted);
 }
 
 /* ─── Evidence list ───────────────────────────────────────────────── */

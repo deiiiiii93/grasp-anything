@@ -13,6 +13,10 @@ describe("atlasToMarkdown", () => {
     expect(md).toContain("Schema validator");
     expect(md).toContain("#### Deterministic core");
   });
+  it("opens each continent with its concept epigraph", () => {
+    expect(md).toContain("Even the Great Wall starts with one brick.");
+    expect(md).toContain("Beauty as productivity.");
+  });
   it("escapes markdown link-breaking chars in hostile names", () => {
     const d = JSON.parse(JSON.stringify(sample));
     d.atlas.continents[0].cities[0].landmarks[0].name = "Evil ]( [x](javascript:alert(1))";
@@ -26,6 +30,10 @@ describe("atlasToHtml", () => {
   it("renders escaped section markup", () => {
     expect(html).toContain("<h3");
     expect(html).toContain("Schema validator");
+  });
+  it("includes the concept epigraph per continent", () => {
+    expect(html).toContain("Even the Great Wall starts with one brick.");
+    expect(html).toContain(`class="epigraph"`);
   });
   it("entity-escapes hostile names", () => {
     const d = JSON.parse(JSON.stringify(sample));

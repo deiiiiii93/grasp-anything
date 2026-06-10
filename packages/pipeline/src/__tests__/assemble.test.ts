@@ -25,12 +25,24 @@ describe("assemble", () => {
     expect(validateBrief(result.doc).ok).toBe(true);
   });
 
+  it("passes the validator's warning tier through on success (golden = clean, thinned = flagged)", () => {
+    const clean = assemble({ meta, essence, success, landscape });
+    expect(clean.ok && clean.warnings).toEqual([]);
+    const thinEssence = JSON.parse(JSON.stringify(essence));
+    thinEssence.atlas.continents[0].cities = thinEssence.atlas.continents[0].cities.slice(0, 1);
+    const thin = assemble({ meta, essence: thinEssence, success, landscape });
+    expect(thin.ok && thin.warnings.join("\n")).toMatch(/only one city/i);
+  });
+
   it("resolves cross-fragment evidence (success.why cites ev1, introduced by essence)", () => {
     const result = assemble({ meta, essence, success, landscape });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.doc.brief.evidence).toEqual({ why: ["ev1"] });
-    expect(result.doc.evidence.map((e) => e.id)).toEqual(["ev1", "ev2"]);
+    // Essence-introduced evidence first (fragment merge order), landscape's ev2 last.
+    expect(result.doc.evidence.map((e) => e.id)).toEqual([
+      "ev1", "ev4", "ev5", "ev6", "ev7", "ev8", "ev9", "ev10", "ev11", "ev12", "ev13", "ev14", "ev2",
+    ]);
   });
 
   it("synthesizes a self-only landscape when offline (no landscape fragment)", () => {
@@ -40,7 +52,7 @@ describe("assemble", () => {
     const land = result.doc.landscapeGraph;
     expect(land.nodes).toHaveLength(1);
     expect(land.nodes[0].type).toBe("self");
-    expect(land.nodes[0].name).toBe("Lum1104/Understand-Anything");
+    expect(land.nodes[0].name).toBe("fuxinyao/grasp");
     expect(land.edges).toEqual([]);
     expect(validateBrief(result.doc).ok).toBe(true);
   });

@@ -20,7 +20,7 @@ export interface AssembleInput {
 }
 
 export type AssembleResult =
-  | { ok: true; doc: BriefDoc }
+  | { ok: true; doc: BriefDoc; warnings: string[] }
   | { ok: false; errors: string[] };
 
 function collect(
@@ -123,5 +123,7 @@ export function assemble(input: AssembleInput): AssembleResult {
   if (!validated.ok || !validated.data) {
     return { ok: false, errors: validated.errors.map((e) => `assembled brief: ${e}`) };
   }
-  return { ok: true, doc: validated.data };
+  // The brief is valid but may be thin — pass the advisory tier up so the
+  // orchestrator can re-dispatch the analyzer for weak continents.
+  return { ok: true, doc: validated.data, warnings: validated.warnings };
 }

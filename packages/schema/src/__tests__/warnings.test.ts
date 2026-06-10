@@ -37,6 +37,31 @@ describe("validation warnings", () => {
     expect(validateBrief(doc).warnings.join("\n")).toMatch(/fewer than three/i);
   });
 
+  it("warns when a populated continent has only one city", () => {
+    const doc = clone();
+    doc.atlas.continents[0].cities = doc.atlas.continents[0].cities.slice(0, 1);
+    expect(validateBrief(doc).warnings.join("\n")).toMatch(/only one city/i);
+  });
+
+  it("warns when a landmark has no whyItMatters", () => {
+    const doc = clone();
+    delete doc.atlas.continents[0].cities[0].landmarks[0].whyItMatters;
+    expect(validateBrief(doc).warnings.join("\n")).toMatch(/no whyItMatters/i);
+  });
+
+  it("warns when a flow continent has cities but zero flows", () => {
+    const doc = clone();
+    const flowCont = doc.atlas.continents.find((c: { domain: string }) => c.domain === "workflows");
+    flowCont.flows = [];
+    expect(validateBrief(doc).warnings.join("\n")).toMatch(/no flows/i);
+  });
+
+  it("warns when a landmark cites no evidence", () => {
+    const doc = clone();
+    doc.atlas.continents[0].cities[0].landmarks[0].evidenceIds = [];
+    expect(validateBrief(doc).warnings.join("\n")).toMatch(/cites no evidence/i);
+  });
+
   it("warns when the landmark count exceeds the performance cap", () => {
     const doc = clone();
     const city = doc.atlas.continents[0].cities[0];

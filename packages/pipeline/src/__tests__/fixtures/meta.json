@@ -1,8 +1,10 @@
 {
-  "repo": "Lum1104/Understand-Anything",
-  "url": "https://github.com/Lum1104/Understand-Anything",
-  "analyzedAt": "2026-06-08T12:00:00Z",
+  "repo": "fuxinyao/grasp",
+  "analyzedAt": "2026-06-10T12:00:00Z",
   "depth": "skim",
   "broadness": "web",
-  "signals": { "stars": 1200, "lastCommit": "2026-06-01", "language": "TypeScript" }
+  "signals": {
+    "lastCommit": "2026-06-10",
+    "language": "TypeScript"
+  }
 }

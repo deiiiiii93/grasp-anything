@@ -1,4 +1,5 @@
 import type { BriefDoc } from "@grasp/schema";
+import { DOMAIN_STORY } from "@grasp/dashboard/adapters";
 
 // Escape the chars that break Markdown link/emphasis syntax in body text.
 export function mdText(s: string): string {
@@ -8,7 +9,10 @@ export function mdText(s: string): string {
 export function atlasToMarkdown(doc: BriefDoc): string {
   const out: string[] = ["## How it works", ""];
   for (const c of doc.atlas.continents) {
-    out.push(`### ${mdText(c.title)} — ${mdText(c.summary)}`, "");
+    out.push(`### ${mdText(c.title)}`, "");
+    // Epigraph: the domain's fixed teaching concept (static string, still escaped).
+    out.push(`> _“${mdText(DOMAIN_STORY[c.domain].concept)}”_`, "");
+    out.push(mdText(c.summary), "");
     for (const city of c.cities) {
       out.push(`#### ${mdText(city.name)}`);
       if (city.summary) out.push(mdText(city.summary));

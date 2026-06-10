@@ -1,18 +1,74 @@
 {
   "landscapeGraph": {
     "nodes": [
-      { "id": "self1", "type": "self", "name": "Understand-Anything", "url": "https://github.com/Lum1104/Understand-Anything", "stars": 1200, "category": "cat1", "evidenceIds": [] },
-      { "id": "alt1", "type": "alternative", "name": "Sourcegraph Cody", "url": "https://github.com/sourcegraph/cody", "stars": 3000, "oneLiner": "AI coding assistant with codebase context.", "similarity": 0.55, "differentiator": "Commercial, IDE-embedded, not a static graph.", "category": "cat1", "evidenceIds": ["ev2"] },
-      { "id": "alt2", "type": "alternative", "name": "CodeSee", "url": "https://github.com/Codesee-io", "stars": 800, "oneLiner": "Visual maps of a codebase.", "similarity": 0.7, "differentiator": "Hosted SaaS; less LLM-driven narrative.", "category": "cat1", "evidenceIds": [] },
-      { "id": "cat1", "type": "category", "label": "Code comprehension tools", "evidenceIds": [] }
+      {
+        "id": "self1",
+        "type": "self",
+        "name": "grasp",
+        "category": "cat1",
+        "evidenceIds": []
+      },
+      {
+        "id": "alt1",
+        "type": "alternative",
+        "name": "Sourcegraph Cody",
+        "url": "https://github.com/sourcegraph/cody",
+        "stars": 3000,
+        "oneLiner": "AI coding assistant with codebase context.",
+        "similarity": 0.55,
+        "differentiator": "Commercial, IDE-embedded, not a static graph.",
+        "category": "cat1",
+        "evidenceIds": [
+          "ev2"
+        ]
+      },
+      {
+        "id": "alt2",
+        "type": "alternative",
+        "name": "CodeSee",
+        "url": "https://github.com/Codesee-io",
+        "stars": 800,
+        "oneLiner": "Visual maps of a codebase.",
+        "similarity": 0.7,
+        "differentiator": "Hosted SaaS; less LLM-driven narrative.",
+        "category": "cat1",
+        "evidenceIds": []
+      },
+      {
+        "id": "cat1",
+        "type": "category",
+        "label": "Code comprehension tools",
+        "evidenceIds": []
+      }
     ],
     "edges": [
-      { "id": "le1", "source": "alt1", "target": "self1", "type": "alternativeTo" },
-      { "id": "le2", "source": "alt2", "target": "self1", "type": "competesWith" },
-      { "id": "le3", "source": "alt1", "target": "alt2", "type": "sharesApproach" }
+      {
+        "id": "le1",
+        "source": "alt1",
+        "target": "self1",
+        "type": "alternativeTo"
+      },
+      {
+        "id": "le2",
+        "source": "alt2",
+        "target": "self1",
+        "type": "competesWith"
+      },
+      {
+        "id": "le3",
+        "source": "alt1",
+        "target": "alt2",
+        "type": "sharesApproach"
+      }
     ]
   },
   "evidence": [
-    { "id": "ev2", "claim": "Cody has 3k+ GitHub stars", "source": "GitHub", "url": "https://github.com/sourcegraph/cody", "verified": true }
+    {
+      "id": "ev2",
+      "claim": "Cody has 3k+ GitHub stars",
+      "source": "GitHub",
+      "url": "https://github.com/sourcegraph/cody",
+      "verified": true
+    }
   ]
 }

@@ -1,4 +1,4 @@
-import { CONTINENT_GEO } from "../adapters/atlas";
+import { CONTINENT_GEO, DOMAIN_STORY } from "../adapters/atlas";
 import type { AtlasDomain } from "@grasp/schema";
 
 const QUESTIONS: Record<AtlasDomain, string> = {
@@ -36,6 +36,7 @@ export function AtlasIntro() {
             </span>
             <span className="domain-q">{QUESTIONS[d]}</span>
             <span className="domain-motif">{CONTINENT_GEO[d].motif}</span>
+            <span className="domain-concept">“{DOMAIN_STORY[d].concept}”</span>
           </li>
         ))}
       </ul>

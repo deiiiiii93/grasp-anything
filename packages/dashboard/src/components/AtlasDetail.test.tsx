@@ -17,6 +17,12 @@ describe("AtlasDetail per altitude", () => {
     expect(screen.getByText("How runtime flows.")).toBeInTheDocument();
     expect(screen.getByText(/continent/i)).toBeInTheDocument();
   });
+  it("renders the continent's story card (concept + lesson + motif art)", () => {
+    render(<AtlasDetail node={{ kind: "continent", continent: cont }} />);
+    expect(screen.getByText(/French design, American made/)).toBeInTheDocument();
+    expect(screen.getByText(/standardized handoff/i)).toBeInTheDocument();
+    expect(screen.getByAltText("Statue of Liberty")).toHaveAttribute("src", "./atlas/landmarks/workflows.png");
+  });
   it("renders a city summary", () => {
     render(<AtlasDetail node={{ kind: "city", city }} />);
     expect(screen.getByText("Reads input.")).toBeInTheDocument();
@@ -24,5 +30,15 @@ describe("AtlasDetail per altitude", () => {
   it("renders the full landmark (why it matters)", () => {
     render(<AtlasDetail node={{ kind: "landmark", landmark: lm }} />);
     expect(screen.getByText("Determinism.")).toBeInTheDocument();
+  });
+  it("renders related flows as source → target chips", () => {
+    const flows = [{
+      id: "f1", continentId: "c", kind: "flow" as const, type: "calls" as const,
+      sourceId: "l", targetId: "x", sourceName: "Parser", targetName: "Store",
+      startLat: 0, startLng: 0, endLat: 1, endLng: 1, color: "#fff", label: "writes",
+    }];
+    render(<AtlasDetail node={{ kind: "landmark", landmark: lm }} flows={flows} />);
+    expect(screen.getByTestId("related-flows")).toHaveTextContent("Parser → Store");
+    expect(screen.getByText("writes")).toBeInTheDocument();
   });
 });
