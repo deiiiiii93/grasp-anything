@@ -2,6 +2,10 @@
 
 Turn any repository into a **strategic brief**: five answers (idea, problem, why it wins, how it works, similar repos) backed by two interactive graphs — a product atlas and a competitive landscape.
 
+**Product Atlas** — zoom from orbit to continent, explore cities and related flows:
+
+![Atlas continent view](docs/screenshot-atlas-continent.png)
+
 **Voyage** — guided tour through every continent, city and landmark:
 
 ![Voyage step 1](docs/screenshot-voyage-1.png)
