@@ -47,6 +47,23 @@ describe("App", () => {
     expect(stage.className).not.toContain("stage-fullscreen");
   });
 
+  it("floats the voyage control and the detail card on the stage in fullscreen", () => {
+    render(<App doc={sampleDoc} />);
+    const stage = screen.getByTestId("atlas-stage");
+    // Not fullscreen: no in-stage voyage button or detail card.
+    expect(within(stage).queryByRole("button", { name: "▶ Voyage" })).not.toBeInTheDocument();
+    expect(within(stage).queryByTestId("atlas-detail")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
+    const detail = within(stage).getByTestId("atlas-detail");
+    expect(detail).toBeInTheDocument();
+    fireEvent.click(within(stage).getByRole("button", { name: "▶ Voyage" }));
+    expect(within(stage).getByTestId("voyage-overlay")).toBeInTheDocument();
+    // The detail card mirrors the voyage's first navigation once it advances.
+    fireEvent.click(within(stage).getByLabelText("Next stop"));
+    expect(within(detail).getByRole("heading")).toHaveTextContent("Architecture");
+  });
+
   it("uses the native Fullscreen API when the stage supports it", () => {
     const request = vi.fn().mockResolvedValue(undefined);
     (HTMLDivElement.prototype as unknown as { requestFullscreen: () => Promise<void> }).requestFullscreen = request;

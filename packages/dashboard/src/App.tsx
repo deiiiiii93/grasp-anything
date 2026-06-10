@@ -139,6 +139,18 @@ export function App({ doc }: { doc: BriefDoc }) {
                 {voyaging && (
                   <VoyageOverlay stops={voyage} onNavigate={setSelectedId} onExit={() => setVoyaging(false)} />
                 )}
+                {/* Fullscreen renders only the stage subtree, so the voyage
+                    control and the detail card float over the globe here. */}
+                {fullscreen.active && (
+                  <>
+                    <button type="button" className="voyage-toggle stage-voyage" aria-pressed={voyaging} onClick={() => setVoyaging((v) => !v)}>
+                      {voyaging ? "✕ End voyage" : "▶ Voyage"}
+                    </button>
+                    <div className="stage-detail">
+                      <AtlasDetail node={detailNode} view={view} flows={relatedFlows(view, selectedId)} onSelect={setSelectedId} />
+                    </div>
+                  </>
+                )}
                 <button
                   type="button"
                   className="fullscreen-toggle"
