@@ -83,12 +83,14 @@ export function GlobeImpl({
 
   // Tinted continent landmass (Natural Earth, slimmed to { continent }).
   const [world, setWorld] = useState<WorldFeature[]>([]);
+  const [worldPending, setWorldPending] = useState(true);
   useEffect(() => {
     let alive = true;
     fetch("./atlas/world.geojson")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${r.status}`))))
       .then((g: { features: WorldFeature[] }) => { if (alive) setWorld(g.features); })
-      .catch(() => {}); // polygons are decoration; the globe works without them
+      .catch(() => {}) // polygons are decoration; the globe works without them
+      .finally(() => { if (alive) setWorldPending(false); });
     return () => { alive = false; };
   }, []);
 
@@ -238,6 +240,13 @@ export function GlobeImpl({
             </span>
           </button>
         ))}
+        <img
+          className={`atlas-compass${worldPending ? " atlas-compass-loading" : ""}`}
+          data-testid="atlas-compass"
+          src="./atlas/compass.png"
+          alt=""
+          draggable={false}
+        />
       </div>
     </div>
   );

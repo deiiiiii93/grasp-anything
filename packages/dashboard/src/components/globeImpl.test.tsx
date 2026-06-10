@@ -87,4 +87,17 @@ describe("GlobeImpl billboards", () => {
     render(<GlobeImpl view={view} selectedId={null} onSelect={noop} width={800} height={600} />);
     await waitFor(() => expect(captured.props?.globeImageUrl).toBe("./earth-dark.jpg"));
   });
+
+  it("compass rose runs at full strength while the world fetch is in flight", () => {
+    render(<GlobeImpl view={view} selectedId={null} onSelect={noop} width={800} height={600} />);
+    expect(screen.getByTestId("atlas-compass").className).toContain("atlas-compass-loading");
+  });
+
+  it("compass settles to ornament opacity once the fetch finishes (even on failure)", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve({ ok: false, status: 404 })));
+    render(<GlobeImpl view={view} selectedId={null} onSelect={noop} width={800} height={600} />);
+    await waitFor(() =>
+      expect(screen.getByTestId("atlas-compass").className).not.toContain("atlas-compass-loading"),
+    );
+  });
 });
