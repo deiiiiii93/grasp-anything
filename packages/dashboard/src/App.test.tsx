@@ -47,16 +47,16 @@ describe("App", () => {
     expect(stage.className).not.toContain("stage-fullscreen");
   });
 
-  it("floats the voyage control and the detail card on the stage in fullscreen", () => {
+  it("the context card is always on the stage; the voyage control floats in on fullscreen", () => {
     render(<App doc={sampleDoc} />);
     const stage = screen.getByTestId("atlas-stage");
-    // Not fullscreen: no in-stage voyage button or detail card.
-    expect(within(stage).queryByRole("button", { name: "▶ Voyage" })).not.toBeInTheDocument();
-    expect(within(stage).queryByTestId("atlas-detail")).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
+    // Detail card is always on the stage (liquid-glass overlay).
     const detail = within(stage).getByTestId("atlas-detail");
     expect(detail).toBeInTheDocument();
+    // Voyage button only floats into the stage in fullscreen.
+    expect(within(stage).queryByRole("button", { name: "▶ Voyage" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
     fireEvent.click(within(stage).getByRole("button", { name: "▶ Voyage" }));
     expect(within(stage).getByTestId("voyage-overlay")).toBeInTheDocument();
     // The detail card mirrors the voyage's first navigation once it advances.

@@ -139,17 +139,15 @@ export function App({ doc }: { doc: BriefDoc }) {
                 {voyaging && (
                   <VoyageOverlay stops={voyage} onNavigate={setSelectedId} onExit={() => setVoyaging(false)} />
                 )}
-                {/* Fullscreen renders only the stage subtree, so the voyage
-                    control and the detail card float over the globe here. */}
+                {/* Context card floats over the globe as a liquid-glass overlay. */}
+                <div className="stage-detail">
+                  <AtlasDetail node={detailNode} view={view} flows={relatedFlows(view, selectedId)} onSelect={setSelectedId} />
+                </div>
+                {/* In fullscreen the voyage control also lives inside the stage subtree. */}
                 {fullscreen.active && (
-                  <>
-                    <button type="button" className="voyage-toggle stage-voyage" aria-pressed={voyaging} onClick={() => setVoyaging((v) => !v)}>
-                      {voyaging ? "✕ End voyage" : "▶ Voyage"}
-                    </button>
-                    <div className="stage-detail">
-                      <AtlasDetail node={detailNode} view={view} flows={relatedFlows(view, selectedId)} onSelect={setSelectedId} />
-                    </div>
-                  </>
+                  <button type="button" className="voyage-toggle stage-voyage" aria-pressed={voyaging} onClick={() => setVoyaging((v) => !v)}>
+                    {voyaging ? "✕ End voyage" : "▶ Voyage"}
+                  </button>
                 )}
                 <button
                   type="button"
@@ -163,7 +161,6 @@ export function App({ doc }: { doc: BriefDoc }) {
               </div>
               <AltitudeRail level={level} onAscend={ascendTo} />
             </div>
-            <AtlasDetail node={detailNode} view={view} flows={relatedFlows(view, selectedId)} onSelect={setSelectedId} />
           </div>
           <div className="atlas-bottom">
             <CameraAltitudesTable view={view} onSelect={setSelectedId} />
