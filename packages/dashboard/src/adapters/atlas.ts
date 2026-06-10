@@ -12,6 +12,36 @@ export const CONTINENT_GEO: Record<AtlasDomain, { continentName: string; motif: 
   uiUxTaste:      { continentName: "Oceania",       motif: "Opera House",       lat: -25, lng: 135,  color: "#f0974a" },
 };
 
+// Domain → teaching metaphor. Like CONTINENT_GEO, narrative is a renderer-side
+// skin: the analyzer stays story-agnostic. Each landmark motif carries a concept
+// that frames its domain — the "Soaring Over the Horizon" script of the atlas.
+export const DOMAIN_STORY: Record<AtlasDomain, { concept: string; lesson: string }> = {
+  architecture: {
+    concept: "Even the Great Wall starts with one brick.",
+    lesson: "A system is laid brick by brick — see the layers before the bricks.",
+  },
+  modules: {
+    concept: "18,038 prefabricated pieces, assembled on site — modular is the power.",
+    lesson: "Independent parts with clean joints: swappable, repairable, replicable.",
+  },
+  workflows: {
+    concept: "French design, American made — standard flows make things happen.",
+    lesson: "A standardized handoff lets work cross any boundary: design in one place, assemble in another.",
+  },
+  businessFlows: {
+    concept: "The oldest org chart in stone — business flow comes first.",
+    lesson: "Hierarchy and the flow of value were designed before a single block moved.",
+  },
+  techSelection: {
+    concept: "Ashlar and andenes — the best choice is the one that fits.",
+    lesson: "Technique chosen to fit the mountain, not the fashion: selection is fit, not fame.",
+  },
+  uiUxTaste: {
+    concept: "Beauty as productivity.",
+    lesson: "A distinctive sensibility is a feature: taste compounds into adoption.",
+  },
+};
+
 export interface ContinentView {
   id: string; domain: AtlasDomain; title: string; summary: string;
   continentName: string; motif: string; lat: number; lng: number; color: string;

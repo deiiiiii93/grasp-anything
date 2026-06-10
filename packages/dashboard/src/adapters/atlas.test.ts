@@ -1,4 +1,4 @@
-import { buildAtlasView, CONTINENT_GEO } from "./atlas";
+import { buildAtlasView, CONTINENT_GEO, DOMAIN_STORY } from "./atlas";
 import { sampleDoc } from "../test-utils/sample";
 
 describe("buildAtlasView", () => {
@@ -41,6 +41,14 @@ describe("buildAtlasView", () => {
     expect(lm.whyItMatters).toMatch(/untrusted agent output/);
     expect(lm.techTag).toBe("Zod");
     expect(lm.evidence.map((e) => e.id)).toEqual(["ev13"]);
+  });
+
+  it("DOMAIN_STORY covers all six domains with non-empty concept and lesson", () => {
+    const domains = ["architecture", "modules", "workflows", "businessFlows", "techSelection", "uiUxTaste"] as const;
+    for (const d of domains) {
+      expect(DOMAIN_STORY[d].concept.trim().length).toBeGreaterThan(0);
+      expect(DOMAIN_STORY[d].lesson.trim().length).toBeGreaterThan(0);
+    }
   });
 
   it("resolves the golden sample's flows into same-continent arcs", () => {

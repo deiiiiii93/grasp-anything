@@ -17,6 +17,12 @@ describe("AtlasDetail per altitude", () => {
     expect(screen.getByText("How runtime flows.")).toBeInTheDocument();
     expect(screen.getByText(/continent/i)).toBeInTheDocument();
   });
+  it("renders the continent's story card (concept + lesson + motif art)", () => {
+    render(<AtlasDetail node={{ kind: "continent", continent: cont }} />);
+    expect(screen.getByText(/French design, American made/)).toBeInTheDocument();
+    expect(screen.getByText(/standardized handoff/i)).toBeInTheDocument();
+    expect(screen.getByAltText("Statue of Liberty")).toHaveAttribute("src", "./atlas/landmarks/workflows.png");
+  });
   it("renders a city summary", () => {
     render(<AtlasDetail node={{ kind: "city", city }} />);
     expect(screen.getByText("Reads input.")).toBeInTheDocument();

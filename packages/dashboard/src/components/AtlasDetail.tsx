@@ -1,4 +1,5 @@
 import type { ContinentView, CityView, LandmarkView } from "../adapters/atlas";
+import { DOMAIN_STORY } from "../adapters/atlas";
 import { EvidenceChips } from "./EvidenceChips";
 
 export type DetailNode =
@@ -17,10 +18,19 @@ export function AtlasDetail({ node }: { node: DetailNode }) {
   }
   if (node.kind === "continent") {
     const c = node.continent;
+    const story = DOMAIN_STORY[c.domain];
     return (
       <aside className="atlas-detail" data-testid="atlas-detail">
         <span className="atlas-detail-kind">Continent</span>
         <h3>{c.title} <span className="atlas-tech">{c.continentName}</span></h3>
+        <figure className="atlas-story-card">
+          <img src={`./atlas/landmarks/${c.domain}.png`} alt={c.motif} className="atlas-story-art" />
+          <figcaption>
+            <blockquote className="atlas-story-concept">“{story.concept}”</blockquote>
+            <p className="atlas-story-lesson">{story.lesson}</p>
+            <span className="atlas-story-motif">{c.motif}</span>
+          </figcaption>
+        </figure>
         <p>{c.summary}</p>
         <p className="atlas-detail-counts">{c.cityCount} cities · {c.landmarkCount} landmarks</p>
         <EvidenceChips evidence={c.evidence} />
