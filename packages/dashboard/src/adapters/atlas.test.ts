@@ -46,6 +46,14 @@ describe("buildAtlasView", () => {
     expect(lm.evidence.map((e) => e.id)).toEqual(["ev13"]);
   });
 
+  it("cities and landmarks carry their continent's domain (renderer maps domain → sprite)", () => {
+    const view = buildAtlasView(sampleDoc);
+    const city = view.cities.find((c) => c.id === "city_core");
+    expect(city?.domain).toBe("architecture");
+    const lm = view.landmarks.find((l) => l.id === "lm_validator");
+    expect(lm?.domain).toBe("architecture");
+  });
+
   it("DOMAIN_STORY covers all six domains with non-empty concept and lesson", () => {
     const domains = ["architecture", "modules", "workflows", "businessFlows", "techSelection", "uiUxTaste"] as const;
     for (const d of domains) {
