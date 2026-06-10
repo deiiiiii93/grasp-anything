@@ -63,7 +63,11 @@ export function AtlasDetail({
   if (node.kind === "continent") {
     const c = node.continent;
     const story = DOMAIN_STORY[c.domain];
-    const cities = view ? view.cities.filter((x) => x.continentId === c.id) : [];
+    const cities = view
+      ? view.cities
+          .filter((x) => x.continentId === c.id)
+          .map((x) => ({ id: x.id, name: x.anchorName ? `${x.name} · ${x.anchorName}` : x.name }))
+      : [];
     return (
       <aside className="atlas-detail" data-testid="atlas-detail">
         <span className="atlas-detail-kind">Continent</span>
@@ -90,7 +94,7 @@ export function AtlasDetail({
     return (
       <aside className="atlas-detail" data-testid="atlas-detail">
         <span className="atlas-detail-kind">City</span>
-        <h3>{c.name}</h3>
+        <h3>{c.name}{c.anchorName && <span className="atlas-tech">{c.anchorName}</span>}</h3>
         {c.summary && <p>{c.summary}</p>}
         <ChildList label="Landmarks" items={lms} onSelect={onSelect} />
         <RelatedFlows flows={flows} />

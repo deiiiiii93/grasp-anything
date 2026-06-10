@@ -1,4 +1,4 @@
-import { buildAtlasView, CONTINENT_GEO, DOMAIN_STORY, relatedFlows } from "./atlas";
+import { ANCHOR_CITIES, buildAtlasView, CONTINENT_GEO, DOMAIN_STORY, relatedFlows } from "./atlas";
 import { sampleDoc } from "../test-utils/sample";
 
 describe("buildAtlasView", () => {
@@ -19,12 +19,15 @@ describe("buildAtlasView", () => {
     expect(arch.motif).toBe("Great Wall");
   });
 
-  it("places every city/landmark within its continent's ring radius", () => {
+  it("docks every city at one of its continent's real anchor cities", () => {
     const view = buildAtlasView(sampleDoc);
     const contById = new Map(view.continents.map((c) => [c.id, c]));
     for (const city of view.cities) {
-      const c = contById.get(city.continentId)!;
-      expect(Math.hypot(city.lat - c.lat, city.lng - c.lng)).toBeLessThanOrEqual(40);
+      const anchors = ANCHOR_CITIES[contById.get(city.continentId)!.domain];
+      const anchor = anchors.find((a) => a.name === city.anchorName)!;
+      expect(anchor).toBeDefined();
+      expect(city.lat).toBe(anchor.lat);
+      expect(city.lng).toBe(anchor.lng);
     }
   });
 
@@ -53,9 +56,11 @@ describe("buildAtlasView", () => {
 
   it("resolves the golden sample's flows into same-continent arcs", () => {
     const view = buildAtlasView(sampleDoc);
-    expect(view.arcs.length).toBe(6);
-    const contByArc = new Set(view.arcs.map((a) => a.continentId));
-    expect(contByArc).toEqual(new Set(["c_wf", "c_biz"]));
+    const flows = view.arcs.filter((a) => a.kind === "flow");
+    expect(flows.length).toBe(6);
+    expect(new Set(flows.map((a) => a.continentId))).toEqual(new Set(["c_wf", "c_biz"]));
+    // One hierarchy spoke per landmark, network-ready.
+    expect(view.arcs.filter((a) => a.kind === "spoke").length).toBe(view.landmarks.length);
   });
 
   it("arcs carry endpoint ids and human names", () => {

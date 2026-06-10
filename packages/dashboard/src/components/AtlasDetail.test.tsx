@@ -33,7 +33,7 @@ describe("AtlasDetail per altitude", () => {
   });
   it("renders related flows as source → target chips", () => {
     const flows = [{
-      id: "f1", continentId: "c", type: "calls" as const,
+      id: "f1", continentId: "c", kind: "flow" as const, type: "calls" as const,
       sourceId: "l", targetId: "x", sourceName: "Parser", targetName: "Store",
       startLat: 0, startLng: 0, endLat: 1, endLng: 1, color: "#fff", label: "writes",
     }];

@@ -72,20 +72,28 @@ export function GlobeImpl({
   };
 
   // Level-of-detail: cities at Continent altitude (only the focused continent once
-  // we've dived), landmarks at City altitude (only the focused city). Flow arcs ride
-  // with landmarks, scoped to the focused continent.
-  const points = [
+  // we've dived), landmarks at City altitude (only the focused city). Both render
+  // as NAMED labels (dot + text) so the network reads like a real map.
+  const labels = [
     ...(visibleAt("city", ctx.level)
       ? view.cities.filter((c) => !ctx.continentId || c.continentId === ctx.continentId)
       : []
-    ).map((c) => ({ id: c.id, lat: c.lat, lng: c.lng, color: c.color, r: 0.3 })),
+    ).map((c) => ({
+      id: c.id, lat: c.lat, lng: c.lng, color: c.color,
+      text: c.anchorName ? `${c.name} · ${c.anchorName}` : c.name,
+      size: 0.95, dot: 0.42,
+    })),
     ...(visibleAt("landmark", ctx.level)
       ? view.landmarks.filter((l) => !ctx.cityId || l.cityId === ctx.cityId)
       : []
-    ).map((l) => ({ id: l.id, lat: l.lat, lng: l.lng, color: l.color, r: 0.18 })),
+    ).map((l) => ({ id: l.id, lat: l.lat, lng: l.lng, color: l.color, text: l.name, size: 0.6, dot: 0.24 })),
   ];
+  // Flow arcs are continent-wide; hierarchy spokes follow the landmark filter
+  // (only the focused city's spokes once the camera is at City altitude).
   const arcs = visibleAt("arc", ctx.level)
-    ? view.arcs.filter((a) => a.continentId === ctx.continentId)
+    ? view.arcs.filter((a) =>
+        a.continentId === ctx.continentId &&
+        (a.kind === "flow" || !ctx.cityId || a.sourceId === ctx.cityId))
     : [];
 
   // Fly the camera whenever the selection changes; idle-rotate only at orbit.
@@ -160,26 +168,31 @@ export function GlobeImpl({
           const cont = contByName.get((f as WorldFeature).properties.continent);
           if (cont) onSelect(cont.id);
         }}
-        pointsData={points}
-        pointLat="lat"
-        pointLng="lng"
-        pointColor="color"
-        pointAltitude={0.006}
-        pointRadius="r"
-        pointsMerge={false}
-        onPointClick={(p) => onSelect((p as { id: string }).id)}
+        labelsData={labels}
+        labelLat="lat"
+        labelLng="lng"
+        labelText="text"
+        labelSize="size"
+        labelDotRadius="dot"
+        labelColor={(l: object) => (l as { color: string }).color}
+        labelAltitude={0.008}
+        labelResolution={2}
+        onLabelClick={(l) => onSelect((l as { id: string }).id)}
         arcsData={arcs}
         arcStartLat="startLat"
         arcStartLng="startLng"
         arcEndLat="endLat"
         arcEndLng="endLng"
-        arcColor={(a: object) => (a as { color: string }).color}
-        arcStroke={0.5}
-        arcDashLength={0.4}
-        arcDashGap={0.2}
-        arcDashAnimateTime={1800}
-        arcAltitudeAutoScale={0.4}
-        onArcClick={(a) => onSelect((a as { id: string }).id)}
+        arcColor={(a: object) => {
+          const arc = a as { kind: string; color: string };
+          return arc.kind === "spoke" ? `${arc.color}88` : arc.color;
+        }}
+        arcStroke={(a: object) => ((a as { kind: string }).kind === "spoke" ? 0.22 : 0.5)}
+        arcDashLength={(a: object) => ((a as { kind: string }).kind === "spoke" ? 1 : 0.4)}
+        arcDashGap={(a: object) => ((a as { kind: string }).kind === "spoke" ? 0 : 0.2)}
+        arcDashAnimateTime={(a: object) => ((a as { kind: string }).kind === "spoke" ? 0 : 1800)}
+        arcAltitudeAutoScale={(a: object) => ((a as { kind: string }).kind === "spoke" ? 0.18 : 0.4)}
+        onArcClick={(a) => onSelect((a as { targetId: string }).targetId)}
         onGlobeClick={() => onSelect(null)}
       />
       {/* Landmark sprite billboards — DOM overlay (no three.js import). */}
