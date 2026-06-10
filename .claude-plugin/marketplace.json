@@ -1,0 +1,20 @@
+{
+  "name": "grasp-anything",
+  "owner": {
+    "name": "deiiiiii93",
+    "url": "https://github.com/deiiiiii93"
+  },
+  "metadata": {
+    "description": "Turn any repository into a strategic brief: five answers backed by a 3D product atlas and competitive landscape graph.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "grasp",
+      "source": "./",
+      "description": "Run /grasp on any local path or GitHub URL to get a strategic brief: core idea, problem, why it wins, how it works, and similar repos — rendered as an interactive 3D atlas and competitive landscape.",
+      "category": "analysis",
+      "tags": ["repository-analysis", "strategic-brief", "atlas", "competitive-landscape", "visualization"]
+    }
+  ]
+}
