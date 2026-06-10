@@ -31,6 +31,9 @@ export function webglAvailable(): boolean {
 // Camera altitude per level — the literal altitude ladder Orbit→Continent→City→Landmark.
 const ALT = { 1: 2.4, 2: 1.3, 3: 0.6, 4: 0.32 } as const;
 
+const OCEAN_URL = "./atlas/ocean.jpg";
+const GLOBE_FALLBACK_URL = "./earth-dark.jpg"; // kept in public/ as the failure tier
+
 // Warning tier: a missing sprite degrades to a colored dot; warn once per URL.
 const warnedSprites = new Set<string>();
 function spriteFailed(e: React.SyntheticEvent<HTMLImageElement>) {
@@ -70,6 +73,14 @@ export function GlobeImpl({
   const ctx = selectionContext(view, selectedId);
   const billboards = buildBillboards(view, ctx);
 
+  // Failure tier: probe the ocean texture once; a 404 must not leave a bare sphere.
+  const [globeUrl, setGlobeUrl] = useState(OCEAN_URL);
+  useEffect(() => {
+    const probe = new Image();
+    probe.onerror = () => setGlobeUrl(GLOBE_FALLBACK_URL);
+    probe.src = OCEAN_URL;
+  }, []);
+
   // Tinted continent landmass (Natural Earth, slimmed to { continent }).
   const [world, setWorld] = useState<WorldFeature[]>([]);
   useEffect(() => {
@@ -87,7 +98,7 @@ export function GlobeImpl({
     const cont = contByName.get((f as WorldFeature).properties.continent);
     if (!cont) return rgba(UNCHARTED, 0.25);
     const dim = ctx.level >= 2 && ctx.continentId != null && cont.id !== ctx.continentId;
-    return rgba(cont.color, dim ? 0.08 : 0.42);
+    return rgba(cont.color, dim ? 0.08 : 0.55);
   };
 
   // Flow arcs are continent-wide; hierarchy spokes follow the landmark filter
@@ -168,8 +179,8 @@ export function GlobeImpl({
         width={width}
         height={height}
         backgroundColor="rgba(0,0,0,0)"
-        globeImageUrl="./earth-dark.jpg"
-        atmosphereColor="#5aa9f0"
+        globeImageUrl={globeUrl}
+        atmosphereColor="#4a7fd6"
         atmosphereAltitude={0.18}
         polygonsData={world}
         polygonCapColor={polygonCap}

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
 import { buildAtlasView } from "../adapters/atlas";
 import { sampleDoc } from "../test-utils/sample";
@@ -66,5 +66,25 @@ describe("GlobeImpl billboards", () => {
     render(<GlobeImpl view={view} selectedId="city_core" onSelect={noop} width={800} height={600} />);
     expect(captured.props).not.toBeNull();
     expect("labelsData" in (captured.props as object)).toBe(false);
+  });
+
+  it("the globe wears the night-atlas ocean and raised land alpha", () => {
+    render(<GlobeImpl view={view} selectedId={null} onSelect={noop} width={800} height={600} />);
+    expect(captured.props?.globeImageUrl).toBe("./atlas/ocean.jpg");
+    const cap = captured.props?.polygonCapColor as (f: object) => string;
+    // architecture/Asia is #e5687a; focused land alpha is now 0.55
+    expect(cap({ properties: { continent: "Asia" } })).toBe("rgba(229, 104, 122, 0.55)");
+  });
+
+  it("falls back to earth-dark.jpg when the ocean texture is missing", async () => {
+    class FailingImage {
+      onerror: (() => void) | null = null;
+      set src(_v: string) {
+        queueMicrotask(() => this.onerror?.());
+      }
+    }
+    vi.stubGlobal("Image", FailingImage);
+    render(<GlobeImpl view={view} selectedId={null} onSelect={noop} width={800} height={600} />);
+    await waitFor(() => expect(captured.props?.globeImageUrl).toBe("./earth-dark.jpg"));
   });
 });
