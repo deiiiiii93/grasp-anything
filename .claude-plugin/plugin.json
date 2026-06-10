@@ -1,6 +1,20 @@
 {
   "name": "grasp",
+  "displayName": "Grasp",
+  "description": "Turn any repository into a strategic brief: five answers (idea, problem, why it wins, how, similar repos) backed by two interactive graphs.",
   "version": "0.1.0",
-  "description": "Produce a strategic brief of any repository — its main idea, the problem it solves, why it succeeds, how it works, and the competitive landscape — as interactive graphs and a self-contained HTML report.",
-  "author": { "name": "grasp" }
+  "author": {
+    "name": "deiiiiii93",
+    "url": "https://github.com/deiiiiii93"
+  },
+  "homepage": "https://github.com/deiiiiii93/grasp-anything",
+  "repository": "https://github.com/deiiiiii93/grasp-anything",
+  "license": "MIT",
+  "keywords": [
+    "repository-analysis",
+    "strategic-brief",
+    "atlas",
+    "competitive-landscape",
+    "visualization"
+  ]
 }
