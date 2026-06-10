@@ -13,17 +13,18 @@ import { AtlasIntro } from "./components/AtlasIntro";
 import { AltitudeRail } from "./components/AltitudeRail";
 import { HowItWorks } from "./components/HowItWorks";
 import { CameraAltitudesTable } from "./components/CameraAltitudesTable";
+import { AtlasListPanel } from "./components/AtlasListPanel";
 
 const AtlasGlobe = lazy(() => import("./components/AtlasGlobe"));
 
 type Tab = "strategic" | "atlas" | "landscape" | "evidence";
 
 const GUARANTEES = [
-  ["Accessible", "Use List view for screen readers and keyboard navigation."],
-  ["Export ready", "The atlas exports as a structured outline + Mermaid flows."],
-  ["Secure by default", "All items and links are escaped; only safe links open."],
-  ["Deterministic layout", "Continents and landmarks are placed reproducibly."],
-  ["Fallback", "If WebGL is unavailable, the outline is shown."],
+  ["♿", "Accessible", "Use List view for screen readers and keyboard navigation."],
+  ["📤", "Export ready", "The atlas exports as a structured outline + Mermaid flows."],
+  ["🔒", "Secure by default", "All items and links are escaped; only safe links open."],
+  ["🎯", "Deterministic layout", "Continents and landmarks are placed reproducibly."],
+  ["🧭", "Fallback", "If WebGL is unavailable, the outline is shown."],
 ] as const;
 
 export function App({ doc }: { doc: BriefDoc }) {
@@ -111,10 +112,7 @@ export function App({ doc }: { doc: BriefDoc }) {
           </div>
           <div className="atlas-bottom">
             <CameraAltitudesTable view={view} onSelect={setSelectedId} />
-            <div className="atlas-listview-panel">
-              <h3>List view (outline)</h3>
-              <AtlasOutline view={view} selectedId={selectedId} onSelect={setSelectedId} />
-            </div>
+            <AtlasListPanel view={view} selectedId={selectedId} onSelect={setSelectedId} />
           </div>
           <HowItWorks view={view} />
         </>
@@ -140,9 +138,9 @@ export function App({ doc }: { doc: BriefDoc }) {
       )}
 
       <footer className="atlas-guarantees">
-        {GUARANTEES.map(([t, d]) => (
+        {GUARANTEES.map(([icon, t, d]) => (
           <div key={t} className="guarantee">
-            <span className="guarantee-title">{t}</span>
+            <span className="guarantee-title"><span className="guarantee-icon" aria-hidden="true">{icon}</span> {t}</span>
             <span className="guarantee-desc">{d}</span>
           </div>
         ))}

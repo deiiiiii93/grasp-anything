@@ -170,6 +170,38 @@ export function relatedFlows(view: AtlasView, selectedId: string | null): ArcVie
   return view.arcs.filter((a) => a.sourceId === selectedId || a.targetId === selectedId);
 }
 
+export interface SearchHit {
+  id: string;
+  kind: "continent" | "city" | "landmark";
+  title: string;
+  context: string; // breadcrumb-ish: continent (· city) the hit lives in
+}
+
+// Case-insensitive search over names, techTags, and tags. Pure; UI-agnostic.
+export function searchAtlas(view: AtlasView, query: string): SearchHit[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const hits: SearchHit[] = [];
+  const contById = new Map(view.continents.map((c) => [c.id, c]));
+  const cityById = new Map(view.cities.map((c) => [c.id, c]));
+  for (const c of view.continents) {
+    if (c.title.toLowerCase().includes(q)) hits.push({ id: c.id, kind: "continent", title: c.title, context: c.continentName });
+  }
+  for (const c of view.cities) {
+    if (c.name.toLowerCase().includes(q))
+      hits.push({ id: c.id, kind: "city", title: c.name, context: contById.get(c.continentId)?.title ?? "" });
+  }
+  for (const l of view.landmarks) {
+    const hay = [l.name, l.techTag ?? "", ...l.tags].join(" ").toLowerCase();
+    if (hay.includes(q)) {
+      const cont = contById.get(l.continentId)?.title ?? "";
+      const city = cityById.get(l.cityId)?.name ?? "";
+      hits.push({ id: l.id, kind: "landmark", title: l.name, context: `${cont} · ${city}` });
+    }
+  }
+  return hits;
+}
+
 // Level-of-detail gate. Cities appear at Continent altitude (2+); landmarks and
 // flow arcs at City altitude (3+).
 export function visibleAt(kind: "city" | "landmark" | "arc", level: 1 | 2 | 3 | 4): boolean {

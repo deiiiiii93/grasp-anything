@@ -1,9 +1,10 @@
 :root {
-  --bg: #0f1115;
-  --panel: #181b22;
+  --bg: #0a0e1a;
+  --panel: #111726;
+  --panel-2: #0d1320;
   --text: #e6e8ec;
-  --muted: #9aa3b2;
-  --border: #2a2f3a;
+  --muted: #93a0b6;
+  --border: #232c42;
   --accent: #f5c451;
   --idea: #f5c451;
   --problem: #e5687a;
@@ -16,9 +17,12 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); }
+body {
+  margin: 0; color: var(--text);
+  background: radial-gradient(1200px 700px at 70% -10%, #16213c 0%, var(--bg) 55%) fixed, var(--bg);
+}
 
-.app { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; }
+.app { max-width: 1240px; margin: 0 auto; padding: 32px 24px 64px; }
 
 .app-header { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 28px; }
 .app-title a, .app-title span { font-size: 28px; font-weight: 700; color: var(--text); text-decoration: none; }
@@ -174,21 +178,40 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .outline-node.selected { background: var(--panel); color: var(--accent); }
 .outline-kind { font-size: 10px; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
 
-/* ─── Altitude rail ───────────────────────────────────────────────── */
+/* ─── Altitude rail (stepper with arrows, per the mockup) ─────────── */
 .altitude-rail {
-  display: flex; list-style: none; padding: 0; margin: 12px 0 0;
-  gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  display: flex; list-style: none; padding: 8px; margin: 12px 0 0;
+  gap: 0; border: 1px solid var(--border); border-radius: 12px;
+  background: var(--panel-2); align-items: stretch;
 }
 .altitude-rail li {
-  flex: 1; display: flex; flex-direction: column; align-items: center;
-  padding: 8px 4px; gap: 2px; border-right: 1px solid var(--border);
-  font-size: 12px; color: var(--muted);
-  transition: background 0.15s, color 0.15s;
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  position: relative; padding: 6px 14px 6px 8px; font-size: 12px; color: var(--muted);
+  border-radius: 8px; transition: background 0.15s, color 0.15s;
 }
-.altitude-rail li:last-child { border-right: none; }
-.altitude-rail li.active { background: var(--panel); color: var(--text); }
-.rail-n { font-size: 16px; font-weight: 700; line-height: 1; }
-.rail-label { font-weight: 600; font-size: 12px; }
+.altitude-rail li:not(:last-child)::after {
+  content: "→"; position: absolute; right: -7px; top: 50%; transform: translateY(-50%);
+  color: var(--border); font-size: 14px; z-index: 1;
+}
+.altitude-rail li.active {
+  background: var(--panel); color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--accent), 0 0 14px rgba(245, 196, 81, 0.12);
+}
+.rail-step-btn {
+  display: flex; align-items: center; gap: 8px; background: none; border: none;
+  color: inherit; cursor: pointer; padding: 0; font: inherit;
+}
+.rail-step-btn:hover { color: var(--text); }
+.altitude-rail li > .rail-icon, .altitude-rail li > .rail-text { margin: 0 4px; }
+.rail-icon { font-size: 18px; line-height: 1; filter: saturate(0.8); }
+.rail-text { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+.rail-n {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 50%; background: var(--border);
+  color: var(--text); font-size: 10px; font-weight: 700; margin-right: 2px;
+}
+.altitude-rail li.active .rail-n { background: var(--accent); color: #0a0e1a; }
+.rail-label { font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; }
 .rail-caption { font-size: 10px; color: var(--muted); }
 
 /* ─── Atlas intro (left column) ───────────────────────────────────── */
@@ -285,6 +308,177 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .phase-badges span {
   font-size: 11px; background: var(--panel); border: 1px solid var(--border);
   border-radius: 4px; padding: 2px 8px; color: var(--muted);
+}
+
+/* ─── Atlas stage (globe + overlays share one box) ────────────────── */
+.atlas-stage { position: relative; min-width: 0; }
+.atlas-globe { position: relative; }
+
+/* ─── Altitude badge (top-left chip over the globe) ───────────────── */
+.altitude-badge {
+  position: absolute; top: 12px; left: 12px; z-index: 4;
+  display: flex; flex-direction: column; gap: 1px;
+  background: rgba(10, 14, 26, 0.82); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 12px; pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+.altitude-badge-level {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent);
+}
+.altitude-badge-caption { font-size: 11px; color: var(--muted); }
+
+/* ─── Voyage (the guided trip) ────────────────────────────────────── */
+.voyage-toggle {
+  background: linear-gradient(180deg, #2a3556, #222b47);
+  color: var(--text); border: 1px solid var(--accent);
+  border-radius: 6px; padding: 4px 12px; font-size: 13px; cursor: pointer; white-space: nowrap;
+}
+.voyage-toggle:hover { box-shadow: 0 0 12px rgba(245, 196, 81, 0.25); }
+.voyage-overlay {
+  position: absolute; inset: 0; z-index: 5; display: flex;
+  align-items: flex-end; justify-content: center; padding: 18px;
+  pointer-events: none;
+}
+.voyage-card {
+  pointer-events: auto; max-width: 520px; width: 100%;
+  background: rgba(13, 19, 32, 0.92); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px 18px; backdrop-filter: blur(6px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+.voyage-chapter {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent);
+}
+.voyage-title { margin: 4px 0 2px; font-size: 18px; }
+.voyage-subtitle { margin: 0 0 6px; font-size: 12px; color: var(--muted); }
+.voyage-concept {
+  margin: 8px 0; padding-left: 10px; border-left: 3px solid var(--accent);
+  font-style: italic; font-size: 14px; color: var(--text);
+}
+.voyage-body { margin: 6px 0 12px; font-size: 13px; line-height: 1.55; color: var(--muted); }
+.voyage-controls { display: flex; gap: 8px; }
+.voyage-controls button {
+  background: var(--panel); color: var(--text); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 12px; font-size: 12px; cursor: pointer;
+}
+.voyage-controls button:disabled { opacity: 0.4; cursor: default; }
+.voyage-controls button:not(:disabled):hover { border-color: var(--accent); }
+.voyage-exit { margin-left: auto; }
+.voyage-progress { display: flex; gap: 5px; margin-top: 12px; }
+.voyage-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--border);
+  transition: background 0.2s, transform 0.2s;
+}
+.voyage-dot.active { background: var(--accent); transform: scale(1.4); }
+
+/* ─── Story card (continent detail) ───────────────────────────────── */
+.atlas-story-card {
+  display: flex; gap: 12px; align-items: flex-start; margin: 0 0 12px;
+  background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px;
+}
+.atlas-story-art { width: 72px; height: auto; flex-shrink: 0; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
+.atlas-story-card figcaption { min-width: 0; }
+.atlas-story-concept {
+  margin: 0 0 6px; padding-left: 8px; border-left: 3px solid var(--accent);
+  font-style: italic; font-size: 13px; line-height: 1.45;
+}
+.atlas-story-lesson { margin: 0 0 6px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+.atlas-story-motif { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+
+/* ─── Detail panel: sections, flows, child lists ──────────────────── */
+.atlas-section-label {
+  display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--muted); margin-bottom: 6px;
+}
+.atlas-related-flows { margin: 12px 0; }
+.atlas-related-flows ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.flow-chip {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px;
+  padding: 5px 9px; font-size: 12px;
+}
+.flow-endpoints { color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.flow-type {
+  flex-shrink: 0; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--accent); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px;
+}
+.atlas-child-list { margin: 12px 0; }
+.atlas-child-list ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.atlas-child-list button {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 999px; padding: 3px 11px; font-size: 12px; cursor: pointer;
+}
+.atlas-child-list button:hover { border-color: var(--accent); }
+
+/* ─── Intro: per-domain concept line ──────────────────────────────── */
+.domain-concept {
+  font-size: 11px; font-style: italic; color: var(--muted); opacity: 0.85;
+  flex-basis: 100%; padding-left: 16px;
+}
+
+/* ─── List panel: tabs, search, mini card ─────────────────────────── */
+.list-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.list-panel-head h3 { margin: 0; }
+.list-panel-tabs { display: flex; gap: 4px; }
+.list-panel-tabs button {
+  background: var(--panel-2); color: var(--muted); border: 1px solid var(--border);
+  border-radius: 6px; padding: 3px 12px; font-size: 12px; cursor: pointer;
+}
+.list-panel-tabs button.active { color: var(--text); border-color: var(--accent); }
+.atlas-search input {
+  width: 100%; background: var(--panel-2); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text); padding: 7px 10px; font-size: 13px;
+  margin-bottom: 8px;
+}
+.atlas-search input:focus { outline: none; border-color: var(--accent); }
+.atlas-search-hits { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; max-height: 260px; overflow-y: auto; }
+.atlas-search-hits button {
+  display: flex; align-items: baseline; gap: 6px; width: 100%; text-align: left;
+  background: none; border: none; color: var(--text); padding: 4px 6px;
+  border-radius: 5px; font-size: 13px; cursor: pointer;
+}
+.atlas-search-hits button:hover { background: var(--panel-2); }
+.hit-context { margin-left: auto; font-size: 11px; color: var(--muted); flex-shrink: 0; }
+.no-hits { font-size: 12px; color: var(--muted); padding: 4px 6px; }
+.atlas-mini-card {
+  margin-top: 12px; background: var(--panel-2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px; font-size: 13px;
+}
+.atlas-mini-card p { margin: 6px 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+.mini-evidence { font-size: 11px; color: var(--accent); }
+
+/* ─── Camera altitudes: expansion controls ────────────────────────── */
+.camera-altitudes-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.camera-altitudes-head h3 { margin: 0; }
+.open-all {
+  background: var(--panel-2); color: var(--muted); border: 1px solid var(--border);
+  border-radius: 6px; padding: 3px 12px; font-size: 12px; cursor: pointer;
+}
+.open-all:hover { color: var(--text); border-color: var(--accent); }
+.camera-altitudes tr { cursor: default; }
+.row-expand {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-size: 11px; padding: 2px 6px 2px 0;
+}
+.row-title {
+  background: none; border: none; color: var(--text); cursor: pointer;
+  font-size: 13px; padding: 0; text-align: left;
+}
+.row-title:hover { color: var(--accent); }
+.row-title.city { padding-left: 26px; color: var(--muted); }
+.row-title.city:hover { color: var(--accent); }
+.city-row td { padding: 5px 6px; }
+
+/* ─── How it works: chapters ──────────────────────────────────────── */
+.how-chapter {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); margin-right: 8px;
+}
+.how-concept {
+  margin: 0 0 8px; padding-left: 10px; border-left: 3px solid var(--border);
+  font-style: italic; font-size: 13px; color: var(--muted);
 }
 
 /* ─── Evidence list ───────────────────────────────────────────────── */
