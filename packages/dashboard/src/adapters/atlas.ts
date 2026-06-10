@@ -92,12 +92,12 @@ export interface ContinentView {
   cityCount: number; landmarkCount: number; evidence: EvidenceChip[];
 }
 export interface CityView {
-  id: string; continentId: string; name: string; summary?: string;
+  id: string; continentId: string; domain: AtlasDomain; name: string; summary?: string;
   anchorName?: string; // the real city this concept-city docks at, e.g. "Cusco"
   lat: number; lng: number; color: string; evidence: EvidenceChip[];
 }
 export interface LandmarkView {
-  id: string; cityId: string; continentId: string; name: string;
+  id: string; cityId: string; continentId: string; domain: AtlasDomain; name: string;
   detail?: string; whyItMatters?: string; techTag?: string; tags: string[];
   lat: number; lng: number; color: string; evidence: EvidenceChip[];
 }
@@ -159,7 +159,7 @@ export function buildAtlasView(doc: BriefDoc): AtlasView {
       // Dock at the next real anchor city; overflow falls back to the seeded ring.
       const anchor = anchors[ci];
       const cp = anchor ? { lat: anchor.lat, lng: anchor.lng } : ringPoint(centroid, city.id, ci, 10, 4);
-      cities.push({ id: city.id, continentId: cont.id, name: city.name, summary: city.summary, anchorName: anchor?.name, lat: cp.lat, lng: cp.lng, color: geo.color, evidence: resolveEvidence(doc, city.evidenceIds) });
+      cities.push({ id: city.id, continentId: cont.id, domain: cont.domain, name: city.name, summary: city.summary, anchorName: anchor?.name, lat: cp.lat, lng: cp.lng, color: geo.color, evidence: resolveEvidence(doc, city.evidenceIds) });
       const cityOutline: OutlineNode = {
         id: city.id, kind: "city",
         title: anchor ? `${city.name} · ${anchor.name}` : city.name,
@@ -168,7 +168,7 @@ export function buildAtlasView(doc: BriefDoc): AtlasView {
       city.landmarks.forEach((lm, li) => {
         // Landmarks huddle 1.6–3° around their city so they stay on the landmass.
         const lp = ringPoint(cp, lm.id, li, 1.6, 1.4);
-        landmarks.push({ id: lm.id, cityId: city.id, continentId: cont.id, name: lm.name, detail: lm.detail, whyItMatters: lm.whyItMatters, techTag: lm.techTag, tags: lm.tags, lat: lp.lat, lng: lp.lng, color: geo.color, evidence: resolveEvidence(doc, lm.evidenceIds) });
+        landmarks.push({ id: lm.id, cityId: city.id, continentId: cont.id, domain: cont.domain, name: lm.name, detail: lm.detail, whyItMatters: lm.whyItMatters, techTag: lm.techTag, tags: lm.tags, lat: lp.lat, lng: lp.lng, color: geo.color, evidence: resolveEvidence(doc, lm.evidenceIds) });
         cityOutline.children.push({ id: lm.id, kind: "landmark", title: lm.name, children: [] });
         // The hierarchy made visible: a spoke from the city to each landmark.
         arcs.push({

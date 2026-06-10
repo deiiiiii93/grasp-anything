@@ -1,7 +1,9 @@
+import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import Globe, { type GlobeMethods } from "react-globe.gl";
 import type { AtlasView } from "../adapters/atlas";
 import { selectionContext, visibleAt } from "../adapters/atlas";
+import { buildBillboards, staggerOffsetPx, type BillboardTier } from "./billboards";
 
 // Slimmed Natural Earth feature: one property, the continent name.
 interface WorldFeature {
@@ -29,6 +31,28 @@ export function webglAvailable(): boolean {
 // Camera altitude per level — the literal altitude ladder Orbit→Continent→City→Landmark.
 const ALT = { 1: 2.4, 2: 1.3, 3: 0.6, 4: 0.32 } as const;
 
+const OCEAN_URL = "./atlas/ocean.jpg";
+const GLOBE_FALLBACK_URL = "./earth-dark.jpg"; // kept in public/ as the failure tier
+
+// Warning tier: a missing sprite degrades to a colored dot; warn once per URL.
+const warnedSprites = new Set<string>();
+function spriteFailed(e: React.SyntheticEvent<HTMLImageElement>) {
+  const img = e.currentTarget;
+  const url = img.getAttribute("src") ?? "";
+  if (!warnedSprites.has(url)) {
+    warnedSprites.add(url);
+    console.warn(`atlas sprite missing: ${url}`);
+  }
+  img.closest(".atlas-bb")?.classList.add("atlas-bb-broken");
+}
+
+// Per-tier billboard size: px = clamp(ratio * mult, min, max), ratio = REF_DIST/camDist.
+const TIER_SCALE: Record<BillboardTier, { mult: number; min: number; max: number }> = {
+  continent: { mult: 52, min: 34, max: 160 },
+  city: { mult: 20, min: 28, max: 64 },
+  landmark: { mult: 16, min: 20, max: 46 },
+};
+
 export function GlobeImpl({
   view,
   selectedId,
@@ -43,22 +67,30 @@ export function GlobeImpl({
   height: number;
 }) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
-  // One <button> billboard per continent, positioned/faded each frame via refs.
-  const markRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  // Latest selection, read inside the rAF loop without restarting it.
-  const selRef = useRef(selectedId);
-  selRef.current = selectedId;
+  // One <button> billboard per visible marker, positioned/faded each frame via refs.
+  const markRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const ctx = selectionContext(view, selectedId);
+  const billboards = buildBillboards(view, ctx);
+
+  // Failure tier: probe the ocean texture once; a 404 must not leave a bare sphere.
+  const [globeUrl, setGlobeUrl] = useState(OCEAN_URL);
+  useEffect(() => {
+    const probe = new Image();
+    probe.onerror = () => setGlobeUrl(GLOBE_FALLBACK_URL);
+    probe.src = OCEAN_URL;
+  }, []);
 
   // Tinted continent landmass (Natural Earth, slimmed to { continent }).
   const [world, setWorld] = useState<WorldFeature[]>([]);
+  const [worldPending, setWorldPending] = useState(true);
   useEffect(() => {
     let alive = true;
     fetch("./atlas/world.geojson")
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${r.status}`))))
       .then((g: { features: WorldFeature[] }) => { if (alive) setWorld(g.features); })
-      .catch(() => {}); // polygons are decoration; the globe works without them
+      .catch(() => {}) // polygons are decoration; the globe works without them
+      .finally(() => { if (alive) setWorldPending(false); });
     return () => { alive = false; };
   }, []);
 
@@ -68,26 +100,9 @@ export function GlobeImpl({
     const cont = contByName.get((f as WorldFeature).properties.continent);
     if (!cont) return rgba(UNCHARTED, 0.25);
     const dim = ctx.level >= 2 && ctx.continentId != null && cont.id !== ctx.continentId;
-    return rgba(cont.color, dim ? 0.08 : 0.42);
+    return rgba(cont.color, dim ? 0.08 : 0.55);
   };
 
-  // Level-of-detail: cities at Continent altitude (only the focused continent once
-  // we've dived), landmarks at City altitude (only the focused city). Both render
-  // as NAMED labels (dot + text) so the network reads like a real map.
-  const labels = [
-    ...(visibleAt("city", ctx.level)
-      ? view.cities.filter((c) => !ctx.continentId || c.continentId === ctx.continentId)
-      : []
-    ).map((c) => ({
-      id: c.id, lat: c.lat, lng: c.lng, color: c.color,
-      text: c.anchorName ? `${c.name} · ${c.anchorName}` : c.name,
-      size: 0.95, dot: 0.42,
-    })),
-    ...(visibleAt("landmark", ctx.level)
-      ? view.landmarks.filter((l) => !ctx.cityId || l.cityId === ctx.cityId)
-      : []
-    ).map((l) => ({ id: l.id, lat: l.lat, lng: l.lng, color: l.color, text: l.name, size: 0.6, dot: 0.24 })),
-  ];
   // Flow arcs are continent-wide; hierarchy spokes follow the landmark filter
   // (only the focused city's spokes once the camera is at City altitude).
   const arcs = visibleAt("arc", ctx.level)
@@ -110,7 +125,8 @@ export function GlobeImpl({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, view]);
 
-  // Sprite billboard positioning + far-side occlusion + dive-dimming (rAF, ref-driven).
+  // Billboard positioning: screen coords + far-side occlusion + per-tier size +
+  // dim/staging rules. rAF + direct style writes; no React state per frame.
   useEffect(() => {
     const g = globeRef.current;
     if (!g) return;
@@ -122,32 +138,41 @@ export function GlobeImpl({
     const tick = () => {
       const cam = g.camera().position;
       const camDist = Math.hypot(cam.x, cam.y, cam.z) || REF_DIST;
-      const sizePx = Math.max(34, Math.min(160, (REF_DIST / camDist) * 52));
-      const live = selectionContext(view, selRef.current);
-      view.continents.forEach((c, i) => {
-        const el = markRefs.current[i];
-        if (!el) return;
-        const p = g.getCoords(c.lat, c.lng, 0);
+      const ratio = REF_DIST / camDist;
+      for (const b of billboards) {
+        const el = markRefs.current.get(b.id);
+        if (!el) continue;
+        const p = g.getCoords(b.lat, b.lng, 0);
         const front = p.x * cam.x + p.y * cam.y + p.z * cam.z > R2; // facing camera
-        const s = g.getScreenCoords(c.lat, c.lng, 0);
+        const s = g.getScreenCoords(b.lat, b.lng, 0);
         if (!front || !s) {
           el.style.opacity = "0";
           el.style.pointerEvents = "none";
-          return;
+          continue;
         }
+        const t = TIER_SCALE[b.tier];
+        let sizePx = Math.max(t.min, Math.min(t.max, ratio * t.mult));
+        let opacity = 1;
         // Dim non-focused continents once the user has dived past orbit.
-        const dim = live.level >= 2 && live.continentId != null && c.id !== live.continentId;
+        if (b.tier === "continent" && ctx.level >= 2 && ctx.continentId != null && b.id !== ctx.continentId)
+          opacity = 0.15;
+        // Figure/ground inversion: at Landmark altitude the focused city recedes.
+        if (b.tier === "city" && ctx.level === 4 && b.id === ctx.cityId) {
+          sizePx *= 0.6;
+          opacity = 0.45;
+        }
         el.style.left = `${s.x}px`;
         el.style.top = `${s.y}px`;
         el.style.width = `${sizePx}px`;
-        el.style.opacity = dim ? "0.15" : "1";
-        el.style.pointerEvents = dim ? "none" : "auto";
-      });
+        el.style.opacity = String(opacity);
+        el.style.pointerEvents = opacity < 0.2 ? "none" : "auto";
+      }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [view]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, selectedId]);
 
   return (
     <div style={{ position: "relative", width, height }}>
@@ -156,8 +181,8 @@ export function GlobeImpl({
         width={width}
         height={height}
         backgroundColor="rgba(0,0,0,0)"
-        globeImageUrl="./earth-dark.jpg"
-        atmosphereColor="#5aa9f0"
+        globeImageUrl={globeUrl}
+        atmosphereColor="#4a7fd6"
         atmosphereAltitude={0.18}
         polygonsData={world}
         polygonCapColor={polygonCap}
@@ -168,16 +193,6 @@ export function GlobeImpl({
           const cont = contByName.get((f as WorldFeature).properties.continent);
           if (cont) onSelect(cont.id);
         }}
-        labelsData={labels}
-        labelLat="lat"
-        labelLng="lng"
-        labelText="text"
-        labelSize="size"
-        labelDotRadius="dot"
-        labelColor={(l: object) => (l as { color: string }).color}
-        labelAltitude={0.008}
-        labelResolution={2}
-        onLabelClick={(l) => onSelect((l as { id: string }).id)}
         arcsData={arcs}
         arcStartLat="startLat"
         arcStartLng="startLng"
@@ -195,57 +210,43 @@ export function GlobeImpl({
         onArcClick={(a) => onSelect((a as { targetId: string }).targetId)}
         onGlobeClick={() => onSelect(null)}
       />
-      {/* Landmark sprite billboards — DOM overlay (no three.js import). */}
+      {/* Billboard overlay — DOM, no three.js import. One button per visible marker. */}
       <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-        {view.continents.map((c, i) => (
+        {billboards.map((b) => (
           <button
-            key={c.id}
+            key={b.id}
             ref={(el) => {
-              markRefs.current[i] = el;
+              if (el) markRefs.current.set(b.id, el);
+              else markRefs.current.delete(b.id);
             }}
             type="button"
-            className="atlas-sprite"
-            title={c.title}
-            onClick={() => onSelect(c.id)}
-            style={{
-              position: "absolute",
-              left: 0,
-              top: 0,
-              opacity: 0,
-              transform: "translate(-50%, -60%)",
-              background: "none",
-              border: "none",
-              padding: 0,
-              cursor: "pointer",
-            }}
+            className={`atlas-bb atlas-bb-${b.tier}`}
+            data-testid={`bb-${b.id}`}
+            title={b.title}
+            onClick={() => onSelect(b.id)}
+            style={{ zIndex: selectedId === b.id ? 2 : 1, "--bb-color": b.color } as React.CSSProperties}
           >
-            <img
-              src={`./atlas/landmarks/${c.domain}.png`}
-              alt={c.title}
-              draggable={false}
-              style={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-                filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.55))",
-              }}
-            />
+            <img className="atlas-bb-img" src={b.spriteUrl} alt={b.label} draggable={false} onError={spriteFailed} />
             <span
-              style={{
-                display: "block",
-                textAlign: "center",
-                marginTop: "-2px",
-                fontSize: "11px",
-                fontWeight: 600,
-                color: c.color,
-                textShadow: "0 1px 3px rgba(0,0,0,0.9)",
-                whiteSpace: "nowrap",
-              }}
+              className="atlas-bb-label"
+              style={
+                {
+                  color: b.tier === "landmark" ? undefined : b.color,
+                  "--stagger": `${staggerOffsetPx(b)}px`,
+                } as React.CSSProperties
+              }
             >
-              {c.title}
+              {b.label}
             </span>
           </button>
         ))}
+        <img
+          className={`atlas-compass${worldPending ? " atlas-compass-loading" : ""}`}
+          data-testid="atlas-compass"
+          src="./atlas/compass.png"
+          alt=""
+          draggable={false}
+        />
       </div>
     </div>
   );
