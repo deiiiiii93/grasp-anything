@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import type { BriefDoc } from "@grasp/schema";
 import { buildCards, buildSignals } from "./adapters/brief";
 import { buildAtlasView, relatedFlows, selectionContext } from "./adapters/atlas";
@@ -15,6 +15,7 @@ import { HowItWorks } from "./components/HowItWorks";
 import { CameraAltitudesTable } from "./components/CameraAltitudesTable";
 import { AtlasListPanel } from "./components/AtlasListPanel";
 import { ExportMenu } from "./components/ExportMenu";
+import { useFullscreen } from "./components/useFullscreen";
 
 const AtlasGlobe = lazy(() => import("./components/AtlasGlobe"));
 
@@ -49,6 +50,8 @@ export function App({ doc }: { doc: BriefDoc }) {
   const [listView, setListView] = useState(false);
   const [voyaging, setVoyaging] = useState(false);
   const voyage = useMemo(() => buildVoyage(view), [view]);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const fullscreen = useFullscreen(stageRef);
   const [theme, setTheme] = useState<Theme>(initialTheme);
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -125,7 +128,7 @@ export function App({ doc }: { doc: BriefDoc }) {
                 </button>
                 <button type="button" className="list-view-toggle" aria-pressed={listView} onClick={() => setListView((v) => !v)}>List view</button>
               </div>
-              <div className="atlas-stage">
+              <div className={`atlas-stage${fullscreen.active ? " stage-fullscreen" : ""}`} ref={stageRef} data-testid="atlas-stage">
                 {listView ? (
                   <AtlasOutline view={view} selectedId={selectedId} onSelect={setSelectedId} />
                 ) : (
@@ -136,6 +139,15 @@ export function App({ doc }: { doc: BriefDoc }) {
                 {voyaging && (
                   <VoyageOverlay stops={voyage} onNavigate={setSelectedId} onExit={() => setVoyaging(false)} />
                 )}
+                <button
+                  type="button"
+                  className="fullscreen-toggle"
+                  aria-label={fullscreen.active ? "Exit full screen" : "Full screen"}
+                  title={fullscreen.active ? "Exit full screen (Esc)" : "Full screen"}
+                  onClick={fullscreen.toggle}
+                >
+                  {fullscreen.active ? "🗗" : "⛶"}
+                </button>
               </div>
               <AltitudeRail level={level} onAscend={ascendTo} />
             </div>

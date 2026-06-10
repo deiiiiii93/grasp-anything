@@ -36,6 +36,31 @@ describe("App", () => {
     expect(screen.getByTestId("landscape-graph")).toBeInTheDocument();
   });
 
+  it("toggles fullscreen on the globe stage (CSS fallback in jsdom) and exits on Esc", () => {
+    render(<App doc={sampleDoc} />);
+    const stage = screen.getByTestId("atlas-stage");
+    expect(stage.className).not.toContain("stage-fullscreen");
+    fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
+    expect(stage.className).toContain("stage-fullscreen");
+    expect(screen.getByRole("button", { name: "Exit full screen" })).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(stage.className).not.toContain("stage-fullscreen");
+  });
+
+  it("uses the native Fullscreen API when the stage supports it", () => {
+    const request = vi.fn().mockResolvedValue(undefined);
+    (HTMLDivElement.prototype as unknown as { requestFullscreen: () => Promise<void> }).requestFullscreen = request;
+    try {
+      render(<App doc={sampleDoc} />);
+      fireEvent.click(screen.getByRole("button", { name: "Full screen" }));
+      expect(request).toHaveBeenCalled();
+      // Native path: no CSS fallback class.
+      expect(screen.getByTestId("atlas-stage").className).not.toContain("stage-fullscreen");
+    } finally {
+      delete (HTMLDivElement.prototype as unknown as { requestFullscreen?: unknown }).requestFullscreen;
+    }
+  });
+
   it("toggles light/dark theme on <html> and persists it", () => {
     localStorage.removeItem("grasp-theme");
     render(<App doc={sampleDoc} />);
