@@ -14,9 +14,19 @@ Turn any repository into a **strategic brief**: five answers (idea, problem, why
 
 ![Atlas list view](docs/screenshot-atlas-landmark.png)
 
+**Voyage** — guided tour through every continent, city and landmark:
+
+![Voyage step 1](docs/screenshot-voyage-1.png)
+
+![Voyage step 2](docs/screenshot-voyage-2.png)
+
 **Evidence** — every claim linked to a verified source file:
 
 ![Evidence tab](docs/screenshot-evidence.png)
+
+**Landscape** — competitive map showing how the repo relates to alternatives:
+
+![Landscape tab](docs/screenshot-landscape.png)
 
 ## Install
 
@@ -47,7 +57,7 @@ On first run you'll be asked two questions:
 - **Depth** — `docs` (README/docs only) · `skim` (+ entry points, recommended) · `deep` (full implementation trace)
 - **Broadness** — `offline` (repo only) · `web` (+ search for adoption & alternatives, recommended)
 
-Grasp produces a self-contained `index.html` report and opens it in your browser.
+Grasp spins up a local HTTP server and opens the report in your browser. The URL (e.g. `http://localhost:8787`) is printed so you can reload or share it across tabs.
 
 ## Incremental re-runs
 
