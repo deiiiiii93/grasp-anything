@@ -2,7 +2,21 @@
 
 Turn any repository into a **strategic brief**: five answers (idea, problem, why it wins, how it works, similar repos) backed by two interactive graphs — a product atlas and a competitive landscape.
 
-![Grasp Product Atlas](docs/screenshot.png)
+**Strategic brief** — five answers about the repo, all evidence-backed:
+
+![Strategic tab](docs/screenshot-strategic.png)
+
+**Product Atlas** — a 3D globe mapping how the product works across six dimensions:
+
+![Atlas tab](docs/screenshot.png)
+
+**Atlas outline** — drill from orbit to landmark, explore cities and flows:
+
+![Atlas list view](docs/screenshot-atlas-landmark.png)
+
+**Evidence** — every claim linked to a verified source file:
+
+![Evidence tab](docs/screenshot-evidence.png)
 
 ## Install
 
