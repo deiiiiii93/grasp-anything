@@ -14,6 +14,7 @@ import { AltitudeRail } from "./components/AltitudeRail";
 import { HowItWorks } from "./components/HowItWorks";
 import { CameraAltitudesTable } from "./components/CameraAltitudesTable";
 import { AtlasListPanel } from "./components/AtlasListPanel";
+import { ExportMenu } from "./components/ExportMenu";
 
 const AtlasGlobe = lazy(() => import("./components/AtlasGlobe"));
 
@@ -33,7 +34,7 @@ function initialTheme(): Theme {
 
 const GUARANTEES = [
   ["♿", "Accessible", "Use List view for screen readers and keyboard navigation."],
-  ["📤", "Export ready", "The atlas exports as a structured outline + Mermaid flows."],
+  ["📤", "Export ready", "Use the Export menu (top right): Markdown report, print-to-PDF HTML, raw JSON."],
   ["🔒", "Secure by default", "All items and links are escaped; only safe links open."],
   ["🎯", "Deterministic layout", "Continents and landmarks are placed reproducibly."],
   ["🧭", "Fallback", "If WebGL is unavailable, the outline is shown."],
@@ -91,14 +92,17 @@ export function App({ doc }: { doc: BriefDoc }) {
             </button>
           ))}
         </nav>
-        <button
-          type="button"
-          className="theme-toggle"
-          aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-          onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-        >
-          {theme === "dark" ? "☀️" : "🌙"}
-        </button>
+        <div className="nav-actions">
+          <ExportMenu doc={doc} />
+          <button
+            type="button"
+            className="theme-toggle"
+            aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+          >
+            {theme === "dark" ? "☀️" : "🌙"}
+          </button>
+        </div>
       </div>
 
       {tab === "strategic" && (

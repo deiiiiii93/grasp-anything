@@ -161,6 +161,7 @@ body {
 }
 .top-nav button:hover { color: var(--text); }
 .top-nav button.active { color: var(--text); background: var(--panel); box-shadow: var(--shadow); }
+.nav-actions { display: flex; align-items: center; gap: 8px; }
 .theme-toggle {
   background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px;
   width: 36px; height: 36px; font-size: 16px; line-height: 1; cursor: pointer;
@@ -168,6 +169,30 @@ body {
   transition: box-shadow 0.15s, border-color 0.15s;
 }
 .theme-toggle:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+
+/* ─── Export menu ─────────────────────────────────────────────────── */
+.export-menu { position: relative; }
+.export-toggle {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 999px; padding: 7px 18px; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s;
+}
+.export-toggle:hover, .export-toggle[aria-expanded="true"] { border-color: var(--accent); box-shadow: var(--shadow); }
+.export-backdrop { position: fixed; inset: 0; z-index: 19; }
+.export-dropdown {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 20;
+  list-style: none; margin: 0; padding: 6px; min-width: 280px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.25);
+}
+.export-dropdown button {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
+  width: 100%; text-align: left; background: none; border: none;
+  border-radius: 9px; padding: 8px 12px; cursor: pointer; color: var(--text);
+}
+.export-dropdown button:hover { background: var(--panel-2); }
+.export-item-label { font-size: 13px; font-weight: 500; }
+.export-item-hint { font-size: 11px; color: var(--muted); }
 
 /* ─── Atlas grid (3 columns: intro | center | detail) ─────────────── */
 /* The globe track absorbs all spare width; the rails stay reading-width. */
