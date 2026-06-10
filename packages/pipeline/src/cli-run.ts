@@ -93,6 +93,11 @@ export function runCli(argv: string[]): number {
     return 1;
   }
 
+  if (result.warnings.length > 0) {
+    console.error("⚠ Atlas density warnings (brief is valid but thin):");
+    for (const w of result.warnings) console.error(`  - ${w}`);
+  }
+
   try {
     const { briefPath, indexPath } = render({ doc: result.doc, targetDir: target, distDir: dist });
     console.error(`✓ Wrote ${briefPath}`);

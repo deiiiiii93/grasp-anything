@@ -87,7 +87,14 @@ On a first run (no prior brief) omit `--prior`/`--stale`. `--prior` preserves th
 `brief.updatedAt` of streams that did **not** re-run; the stale ones get the new
 `meta.analyzedAt`.
 
-- Exit 0: it printed the openable `index.html` path on stdout. Proceed.
+- Exit 0: it printed the openable `index.html` path on stdout. **Check stderr
+  for `⚠ Atlas density warnings`** — the brief rendered, but the atlas is thin
+  (single-city continents, landmarks missing `whyItMatters`/evidence, flow
+  continents without flows). At `depth: skim` or `deep`, re-dispatch the
+  **essence-analyzer once** with the warning lines appended to its prompt
+  ("the validator flagged these gaps — densify exactly these"), overwrite
+  `essence.json`, and re-run the CLI. At `depth: docs`, warnings are expected;
+  mention them to the user instead. Never loop more than once.
 - Exit 1: it printed validation errors. Read them, identify which fragment is at
   fault (errors are prefixed `essence.` / `success.` / `landscape.` / `assembled
   brief:`), re-dispatch **only that agent** with the error text, overwrite its
