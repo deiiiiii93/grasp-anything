@@ -245,6 +245,11 @@ body {
   color: #e8e6e0; font-size: 10px; font-weight: 500;
   transform: translateY(var(--stagger, 0px));
 }
+.atlas-bb-broken .atlas-bb-img { display: none; }
+.atlas-bb-broken::before {
+  content: ""; display: block; width: 10px; height: 10px; margin: 0 auto;
+  border-radius: 50%; background: var(--bb-color, #e8e6e0);
+}
 
 /* ─── Atlas globe fallback / outline ─────────────────────────────── */
 .atlas-globe-fallback { padding: 8px 0; }

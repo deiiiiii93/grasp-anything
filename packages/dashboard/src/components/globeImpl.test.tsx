@@ -55,6 +55,13 @@ describe("GlobeImpl billboards", () => {
     expect(onSelect).toHaveBeenCalledWith("lm_validator");
   });
 
+  it("a failed sprite collapses to a tier-colored dot, not a broken image", () => {
+    render(<GlobeImpl view={view} selectedId={null} onSelect={noop} width={800} height={600} />);
+    const btn = screen.getByTestId("bb-c_arch");
+    fireEvent.error(btn.querySelector("img") as HTMLImageElement);
+    expect(btn.className).toContain("atlas-bb-broken");
+  });
+
   it("labelsData is retired — cities/landmarks no longer go through globe.gl labels", () => {
     render(<GlobeImpl view={view} selectedId="city_core" onSelect={noop} width={800} height={600} />);
     expect(captured.props).not.toBeNull();

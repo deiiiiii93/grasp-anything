@@ -31,6 +31,18 @@ export function webglAvailable(): boolean {
 // Camera altitude per level — the literal altitude ladder Orbit→Continent→City→Landmark.
 const ALT = { 1: 2.4, 2: 1.3, 3: 0.6, 4: 0.32 } as const;
 
+// Warning tier: a missing sprite degrades to a colored dot; warn once per URL.
+const warnedSprites = new Set<string>();
+function spriteFailed(e: React.SyntheticEvent<HTMLImageElement>) {
+  const img = e.currentTarget;
+  const url = img.getAttribute("src") ?? "";
+  if (!warnedSprites.has(url)) {
+    warnedSprites.add(url);
+    console.warn(`atlas sprite missing: ${url}`);
+  }
+  img.closest(".atlas-bb")?.classList.add("atlas-bb-broken");
+}
+
 // Per-tier billboard size: px = clamp(ratio * mult, min, max), ratio = REF_DIST/camDist.
 const TIER_SCALE: Record<BillboardTier, { mult: number; min: number; max: number }> = {
   continent: { mult: 52, min: 34, max: 160 },
@@ -201,7 +213,7 @@ export function GlobeImpl({
             onClick={() => onSelect(b.id)}
             style={{ zIndex: selectedId === b.id ? 2 : 1, "--bb-color": b.color } as React.CSSProperties}
           >
-            <img className="atlas-bb-img" src={b.spriteUrl} alt={b.label} draggable={false} />
+            <img className="atlas-bb-img" src={b.spriteUrl} alt={b.label} draggable={false} onError={spriteFailed} />
             <span
               className="atlas-bb-label"
               style={
